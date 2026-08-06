@@ -23,7 +23,7 @@ export default function AuthCallback() {
 
     const exchangeToken = async () => {
       try {
-        const AUTH_API_URL = import.meta.env.VITE_AUTH_API_BASE_URL;
+        const AUTH_API_URL = import.meta.env.VITE_AUTH_API_BASE_URL || 'https://api.bnxmail.com/api/oauth';
         
         const response = await fetch(`${AUTH_API_URL}/token`, {
           method: 'POST',
