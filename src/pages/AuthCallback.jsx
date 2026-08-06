@@ -31,9 +31,9 @@ export default function AuthCallback() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            client_id: 'bit-tool',
-            client_secret: 'secure-bit-tool-secret-2026',
-            grant_type: 'authorization_code',
+            clientId: 'bit-tool',
+            clientSecret: 'secure-bit-tool-secret-2026',
+            grantType: 'authorization_code',
             code: code,
           }),
         });
