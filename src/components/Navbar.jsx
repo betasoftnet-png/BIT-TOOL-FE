@@ -11,8 +11,27 @@ export default function Navbar({ toggleMobileMenu }) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({
           name: payload.sub || 'User',
-          plan: 'Pro Plan'
+          plan: 'Pro Plan',
+          avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
         });
+        
+        // Fetch full user details asynchronously
+        fetch('https://api.bnxmail.com/api/users/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setUser({
+              name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
+              plan: 'Pro Plan',
+              avatar: data.data.profilePicture || 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
+            });
+          }
+        })
+        .catch(err => console.error("Failed to fetch user details:", err));
       } catch (e) {
         console.error('Invalid token', e);
         localStorage.removeItem('bnx_auth_token');
@@ -65,7 +84,7 @@ export default function Navbar({ toggleMobileMenu }) {
               <p className="text-xs text-gray-500">{user.plan}</p>
             </div>
             <img 
-              src="https://i.pravatar.cc/150?u=a042581f4e29026704d" 
+              src={user.avatar} 
               alt="Profile Avatar" 
               className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
             />
