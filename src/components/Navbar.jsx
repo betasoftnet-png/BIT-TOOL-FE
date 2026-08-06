@@ -11,7 +11,6 @@ export default function Navbar({ toggleMobileMenu }) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({
           name: payload.sub || 'User',
-          plan: 'Pro Plan',
           avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
         });
         
@@ -26,7 +25,6 @@ export default function Navbar({ toggleMobileMenu }) {
           if (data.success && data.data) {
             setUser({
               name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
-              plan: 'Pro Plan',
               avatar: data.data.profilePicture || 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
             });
           }
@@ -81,7 +79,7 @@ export default function Navbar({ toggleMobileMenu }) {
           <div className="flex items-center gap-3 cursor-pointer group relative">
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium text-gray-700 leading-tight">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.plan}</p>
+              {/* <p className="text-xs text-gray-500">{user.plan}</p> */}
             </div>
             <img 
               src={user.avatar} 
