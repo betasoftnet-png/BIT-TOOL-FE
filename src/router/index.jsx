@@ -11,6 +11,7 @@ import Lens from '../pages/Lens';
 import Weather from '../pages/Weather';
 import News from '../pages/News';
 import Keyboard from '../pages/Keyboard';
+import AuthCallback from '../pages/AuthCallback';
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: '/news', element: <News /> },
       { path: '/keyboard', element: <Keyboard /> },
       { path: '/settings', element: <Settings /> },
+      { path: '/auth', element: <AuthCallback /> },
     ],
   },
 ]);
