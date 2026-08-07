@@ -22,6 +22,19 @@ export const contactService = {
         }
     },
 
+    async getAllContacts() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/get-all`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching all contacts:', error);
+            throw error;
+        }
+    },
+
     async getContact(id) {
         try {
             const response = await fetch(`${API_BASE_URL}/get/${id}`, {

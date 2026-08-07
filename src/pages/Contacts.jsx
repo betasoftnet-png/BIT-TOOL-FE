@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Search, Edit2, Trash2, Mail, Phone, Briefcase, X, Loader2, AlertCircle } from 'lucide-react';
 import { contactService } from '../services/contactService';
+import BitToolLogo from '../assets/BIT-TOOL-2.png';
+import CliksBusinessLogo from '../assets/cliks-business.png';
+import CliksLogo from '../assets/cliks.png';
+
+const getAppLogo = (appName) => {
+  if (appName === 'Bit Tool') return BitToolLogo;
+  if (appName === 'Cliks Business') return CliksBusinessLogo;
+  if (appName === 'Cliks') return CliksLogo;
+  return BitToolLogo;
+};
 
 export default function Contacts() {
   const [contacts, setContacts] = useState([]);
@@ -25,7 +35,7 @@ export default function Contacts() {
     try {
       setLoading(true);
       setError(null);
-      const res = await contactService.getContacts(50, 0);
+      const res = await contactService.getAllContacts();
       if (res.status === 'success') {
         setContacts(res.data?.rows || []);
       }
@@ -168,12 +178,17 @@ export default function Contacts() {
                   <tr key={contact.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-700 font-bold text-lg border border-blue-100">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-700 font-bold text-lg border border-blue-100 flex-shrink-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="font-bold text-gray-800">{contact.name}</p>
-                          <p className="text-xs text-gray-400 font-medium">Added {new Date(contact.createdAt).toLocaleDateString()}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                             <img src={getAppLogo(contact.applicationName)} alt={contact.applicationName} title={contact.applicationName} className="w-3.5 h-3.5 rounded-sm object-contain" />
+                             <p className="text-[10px] text-gray-500 font-bold tracking-wide">{contact.applicationName}</p>
+                             <span className="text-gray-300 mx-0.5">•</span>
+                             <p className="text-[10px] text-gray-400 font-medium">Added {new Date(contact.createdAt).toLocaleDateString()}</p>
+                          </div>
                         </div>
                       </div>
                     </td>
