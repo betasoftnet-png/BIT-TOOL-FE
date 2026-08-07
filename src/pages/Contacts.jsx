@@ -22,6 +22,7 @@ export default function Contacts() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentContact, setCurrentContact] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -111,6 +112,16 @@ export default function Contacts() {
     }
   };
 
+  const filteredContacts = contacts.filter(contact => {
+    if (!searchQuery) return true;
+    const lowerQuery = searchQuery.toLowerCase();
+    return (
+      (contact.name && contact.name.toLowerCase().includes(lowerQuery)) ||
+      (contact.email && contact.email.toLowerCase().includes(lowerQuery)) ||
+      (contact.phonenumber && contact.phonenumber.toLowerCase().includes(lowerQuery))
+    );
+  });
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 h-full flex flex-col">
       {/* Header */}
@@ -124,13 +135,27 @@ export default function Contacts() {
           </h1>
           <p className="text-gray-500 mt-2 text-sm">Manage your contacts across all integrated applications.</p>
         </div>
-        <button 
-          onClick={openAddModal}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-blue-200 flex items-center gap-2"
-        >
-          <Plus size={18} />
-          New Contact
-        </button>
+        
+        <div className="flex items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm font-medium bg-white"
+            />
+          </div>
+          
+          <button 
+            onClick={openAddModal}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm shadow-blue-200 flex items-center gap-2 whitespace-nowrap"
+          >
+            <Plus size={18} />
+            New Contact
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -174,8 +199,15 @@ export default function Contacts() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {contacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-gray-50/50 transition-colors group">
+                {filteredContacts.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="py-8 text-center text-gray-500">
+                      No contacts found matching "{searchQuery}"
+                    </td>
+                  </tr>
+                ) : (
+                  filteredContacts.map((contact) => (
+                    <tr key={contact.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-700 font-bold text-lg border border-blue-100 flex-shrink-0">
@@ -227,7 +259,7 @@ export default function Contacts() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           )}
