@@ -620,10 +620,10 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
         },
         smartBtn: {
             flex: 1,
-            padding: isInline ? '16px 0' : '5px 0',
-            borderRadius: isInline ? '12px' : '10px',
+            padding: isInline ? '12px 0' : '5px 0',
+            borderRadius: isInline ? '10px' : '10px',
             border: '1px solid #E2E8F0',
-            fontSize: isInline ? '14px' : '11px',
+            fontSize: isInline ? '13px' : '11px',
             fontWeight: '800',
             cursor: 'pointer',
             display: 'flex',
@@ -635,16 +635,16 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
         grid: {
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: isInline ? '12px' : '5px',
-            padding: isInline ? '24px' : '12px',
+            gap: isInline ? '8px' : '5px',
+            padding: isInline ? '16px 24px' : '12px',
             background: '#FFFFFF',
             flexShrink: 0
         },
         keyBtn: {
-            height: isInline ? '72px' : '36px',
-            borderRadius: isInline ? '16px' : '8px',
+            height: isInline ? '54px' : '36px',
+            borderRadius: isInline ? '12px' : '8px',
             border: 'none',
-            fontSize: isInline ? '24px' : '14px',
+            fontSize: isInline ? '20px' : '14px',
             fontWeight: '700',
             cursor: 'pointer',
             display: 'flex',
@@ -931,7 +931,7 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                         </div>
                         
                         {/* RIGHT COLUMN: Controls (SmartBar, Keypad, Total) */}
-                        <div style={{ width: '450px', display: 'flex', flexDirection: 'column', background: '#FFFFFF', flexShrink: 0, overflowY: 'auto' }} className="custom-scrollbar">
+                        <div style={{ width: '380px', display: 'flex', flexDirection: 'column', background: '#FFFFFF', flexShrink: 0, borderLeft: '1px solid #E2E8F0' }}>
                             <div style={styles.smartBar}>
                             <button 
                                 onClick={() => setShowSmartOptions(showSmartOptions === 'gst' ? null : 'gst')}
