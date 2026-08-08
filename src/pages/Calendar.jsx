@@ -1,30 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Plus, Clock, FileText, CheckCircle, Search, Bell, AlignLeft, Tag } from 'lucide-react';
+import Holidays from 'date-holidays';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { calendarService } from '../services/calendarService';
 
 export default function Calendar() {
+  const queryClient = useQueryClient();
+  const searchRef = useRef(null);
+
+  // Calendar State
   const [currentDate, setCurrentDate] = useState(new Date());
-  // events: { 'YYYY-MM-DD': [{ id, title, desc, start, end }] }
-  const [events, setEvents] = useState({});
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [editingEvent, setEditingEvent] = useState(null);
+  const [activeTab, setActiveTab] = useState('event'); // 'event', 'note', 'reminder'
+  const [editingItem, setEditingItem] = useState(null); // { type: 'event'|'note'|'reminder', data: {...} }
 
   // Form State
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(''); // also content for notes
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
+  const [categoryId, setCategoryId] = useState('');
 
-  // Calendar Logic
-  const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  // Setup Month Bounds
+  const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const getFirstDayOfMonth = (y, m) => new Date(y, m, 1).getDay();
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
+  
+  const monthStartStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const monthEndStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
 
+  // Queries
+  const { data: monthDataObj, isLoading: isMonthLoading } = useQuery({
+    queryKey: ['calendar-month', year, month],
+    queryFn: () => calendarService.search('', { startDate: monthStartStr, endDate: monthEndStr })
+  });
+  
+  const { data: categoriesObj } = useQuery({
+    queryKey: ['calendar-categories'],
+    queryFn: () => calendarService.getCategories()
+  });
+
+  const { data: searchResultsObj, isLoading: isSearching } = useQuery({
+    queryKey: ['calendar-search', searchQuery],
+    queryFn: () => calendarService.search(searchQuery),
+    enabled: searchQuery.length > 1
+  });
+
+  const monthData = monthDataObj?.data || { events: [], notes: [], reminders: [] };
+  const categories = categoriesObj?.data || [];
+  const searchResults = searchResultsObj?.data || { events: [], notes: [], reminders: [] };
+
+  // Data processing for grid
+  const groupedData = useMemo(() => {
+    const map = {};
+    if (monthData.events) {
+      monthData.events.forEach(ev => {
+        const d = ev.startTime.split('T')[0];
+        if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
+        map[d].events.push(ev);
+      });
+    }
+    if (monthData.notes) {
+      monthData.notes.forEach(nt => {
+        const d = nt.date.split('T')[0];
+        if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
+        map[d].notes.push(nt);
+      });
+    }
+    if (monthData.reminders) {
+      monthData.reminders.forEach(rm => {
+        const d = rm.date.split('T')[0];
+        if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
+        map[d].reminders.push(rm);
+      });
+    }
+    return map;
+  }, [monthData]);
+
+  // Holidays
+  const holidaysMap = useMemo(() => {
+    const hdIN = new Holidays('IN');
+    const hdWorld = new Holidays('US'); 
+    const map = {};
+    const addHols = (hols, type) => {
+      if (!hols) return;
+      hols.forEach(h => {
+        const dateStr = h.date.split(' ')[0];
+        if (!map[dateStr]) map[dateStr] = [];
+        if (!map[dateStr].find(existing => existing.name === h.name)) {
+          map[dateStr].push({ ...h, type });
+        }
+      });
+    };
+    addHols(hdWorld.getHolidays(year), 'World');
+    addHols(hdIN.getHolidays(year), 'IN');
+    return map;
+  }, [year]);
+
+  // Nav Handlers
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
   const goToToday = () => setCurrentDate(new Date());
@@ -32,101 +116,269 @@ export default function Calendar() {
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const openModal = (day, eventToEdit = null) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  // Click outside search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Modal Handlers
+  const openModal = (day, itemToEdit = null, type = 'event') => {
+    let dateStr = selectedDate;
+    if (day) {
+      dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    
     setSelectedDate(dateStr);
-    if (eventToEdit) {
-      setEditingEvent(eventToEdit);
-      setTitle(eventToEdit.title);
-      setDescription(eventToEdit.description || '');
-      setStartTime(eventToEdit.startTime);
-      setEndTime(eventToEdit.endTime);
+    
+    if (itemToEdit) {
+      setEditingItem({ type, data: itemToEdit });
+      setActiveTab(type);
+      setTitle(itemToEdit.title);
+      setCategoryId(itemToEdit.categoryId || '');
+      
+      if (type === 'event') {
+        setDescription(itemToEdit.description || '');
+        setStartTime(new Date(itemToEdit.startTime).toISOString().substr(11, 5));
+        setEndTime(new Date(itemToEdit.endTime).toISOString().substr(11, 5));
+      } else if (type === 'note') {
+        setDescription(itemToEdit.content || '');
+      } else if (type === 'reminder') {
+        setDescription(itemToEdit.description || '');
+        setStartTime(itemToEdit.time || '09:00'); // repurposing startTime for reminder time
+      }
     } else {
-      setEditingEvent(null);
+      setEditingItem(null);
       setTitle('');
       setDescription('');
       setStartTime('09:00');
       setEndTime('10:00');
+      setCategoryId('');
     }
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setEditingEvent(null);
+    setEditingItem(null);
   };
 
-  const saveEvent = (e) => {
+  // Mutations
+  const invalidateMonth = () => queryClient.invalidateQueries(['calendar-month', year, month]);
+
+  const eventMutation = useMutation({
+    mutationFn: (data) => editingItem ? calendarService.updateEvent(editingItem.data.id, data) : calendarService.createEvent(data),
+    onSuccess: () => { invalidateMonth(); closeModal(); }
+  });
+  
+  const noteMutation = useMutation({
+    mutationFn: (data) => editingItem ? calendarService.updateNote(editingItem.data.id, data) : calendarService.createNote(data),
+    onSuccess: () => { invalidateMonth(); closeModal(); }
+  });
+  
+  const reminderMutation = useMutation({
+    mutationFn: (data) => editingItem ? calendarService.updateReminder(editingItem.data.id, data) : calendarService.createReminder(data),
+    onSuccess: () => { invalidateMonth(); closeModal(); }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ type, id }) => {
+      if (type === 'event') return calendarService.deleteEvent(id);
+      if (type === 'note') return calendarService.deleteNote(id);
+      if (type === 'reminder') return calendarService.deleteReminder(id);
+    },
+    onSuccess: () => { invalidateMonth(); closeModal(); }
+  });
+
+  const completeReminderMutation = useMutation({
+    mutationFn: (id) => calendarService.completeReminder(id),
+    onSuccess: () => invalidateMonth()
+  });
+
+  const handleSave = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newEvent = {
-      id: editingEvent ? editingEvent.id : Date.now().toString(),
-      title,
-      description,
-      startTime,
-      endTime
-    };
-
-    setEvents(prev => {
-      const dayEvents = prev[selectedDate] || [];
-      if (editingEvent) {
-        return {
-          ...prev,
-          [selectedDate]: dayEvents.map(ev => ev.id === editingEvent.id ? newEvent : ev)
-        };
-      } else {
-        return {
-          ...prev,
-          [selectedDate]: [...dayEvents, newEvent]
-        };
-      }
-    });
-    closeModal();
+    const basePayload = { title, categoryId: categoryId || null };
+    
+    if (activeTab === 'event') {
+      const startISO = new Date(`${selectedDate}T${startTime}:00.000Z`).toISOString();
+      const endISO = new Date(`${selectedDate}T${endTime}:00.000Z`).toISOString();
+      eventMutation.mutate({ ...basePayload, description, startTime: startISO, endTime: endISO });
+    } 
+    else if (activeTab === 'note') {
+      const dateISO = new Date(`${selectedDate}T00:00:00.000Z`).toISOString();
+      noteMutation.mutate({ ...basePayload, content: description, date: dateISO });
+    } 
+    else if (activeTab === 'reminder') {
+      // Time is repurposed in startTime state
+      const dateISO = new Date(`${selectedDate}T${startTime}:00.000Z`).toISOString();
+      reminderMutation.mutate({ ...basePayload, description, date: dateISO, time: startTime });
+    }
   };
 
-  const deleteEvent = () => {
-    if (!editingEvent) return;
-    setEvents(prev => ({
-      ...prev,
-      [selectedDate]: prev[selectedDate].filter(ev => ev.id !== editingEvent.id)
-    }));
-    closeModal();
+  const handleDelete = () => {
+    if (editingItem) {
+      deleteMutation.mutate({ type: editingItem.type, id: editingItem.data.id });
+    }
+  };
+
+  // Rendering Helpers
+  const renderItemPill = (item, type, day) => {
+    let bg = 'bg-blue-50 text-blue-700 border-blue-100/50 hover:bg-blue-100'; // event
+    let icon = <CalendarIcon size={10} className="mr-1 inline" />;
+    let timeOrLabel = item.startTime ? new Date(item.startTime).toISOString().substr(11, 5) : '';
+    
+    if (type === 'note') {
+      bg = 'bg-yellow-50 text-yellow-700 border-yellow-100/50 hover:bg-yellow-100';
+      icon = <FileText size={10} className="mr-1 inline text-yellow-600" />;
+      timeOrLabel = '';
+    } else if (type === 'reminder') {
+      const isCompleted = item.status === 'completed';
+      bg = isCompleted ? 'bg-gray-100 text-gray-500 border-gray-200 line-through' : 'bg-purple-50 text-purple-700 border-purple-100/50 hover:bg-purple-100';
+      icon = <Bell size={10} className={`mr-1 inline ${isCompleted ? 'text-gray-400' : 'text-purple-600'}`} />;
+      timeOrLabel = item.time || '';
+    }
+
+    return (
+      <div 
+        key={`${type}-${item.id}`}
+        onClick={(e) => { e.stopPropagation(); openModal(day, item, type); }}
+        className={`text-xs px-2 py-1 rounded truncate border transition-colors cursor-pointer flex items-center ${bg}`}
+        title={item.title}
+      >
+        {icon}
+        <span className="font-medium mr-1">{timeOrLabel}</span>
+        <span className="truncate">{item.title}</span>
+        
+        {type === 'reminder' && item.status !== 'completed' && (
+          <button 
+            onClick={(e) => { e.stopPropagation(); completeReminderMutation.mutate(item.id); }}
+            className="ml-auto hover:text-green-600 pl-1"
+            title="Mark Complete"
+          >
+            <CheckCircle size={12} />
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="max-w-5xl mx-auto h-full flex flex-col">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-6xl mx-auto h-full flex flex-col p-4 md:p-8">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight flex items-center gap-3">
-            <CalendarIcon className="text-primary" size={32} />
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
+              <CalendarIcon size={24} />
+            </div>
             Calendar
           </h1>
-          <p className="text-gray-500 mt-1">Manage your schedule and events</p>
+          <p className="text-gray-500 mt-2 text-sm">Manage your events, notes, and reminders</p>
         </div>
         
-        <div className="flex items-center gap-4 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-          <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <span className="font-semibold text-gray-800 min-w-[120px] text-center">
-            {monthNames[month]} {year}
-          </span>
-          <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
-            <ChevronRight size={20} />
-          </button>
-          <div className="w-px h-6 bg-gray-200 mx-1"></div>
-          <button onClick={goToToday} className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
+        <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
+          {/* Unified Search */}
+          <div className="relative w-full md:w-72" ref={searchRef}>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search everything..."
+              value={searchQuery}
+              onFocus={() => setIsSearchFocused(true)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm font-medium bg-white"
+            />
+            
+            {/* Search Results Dropdown */}
+            <AnimatePresence>
+              {isSearchFocused && searchQuery.length > 1 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 max-h-96 overflow-y-auto"
+                >
+                  {isSearching ? (
+                    <div className="p-4 text-center text-sm text-gray-500">Searching...</div>
+                  ) : (
+                    <div className="p-2 space-y-4">
+                      {searchResults.events?.length > 0 && (
+                        <div>
+                          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Events</div>
+                          {searchResults.events.map(ev => (
+                            <div key={ev.id} onClick={() => { setSelectedDate(ev.startTime.split('T')[0]); openModal(null, ev, 'event'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
+                              <CalendarIcon size={16} className="text-blue-500" />
+                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{ev.title}</div><div className="text-xs text-gray-500">{new Date(ev.startTime).toLocaleDateString()}</div></div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {searchResults.notes?.length > 0 && (
+                        <div>
+                          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Notes</div>
+                          {searchResults.notes.map(nt => (
+                            <div key={nt.id} onClick={() => { setSelectedDate(nt.date.split('T')[0]); openModal(null, nt, 'note'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
+                              <FileText size={16} className="text-yellow-500" />
+                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{nt.title}</div><div className="text-xs text-gray-500">{new Date(nt.date).toLocaleDateString()}</div></div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {searchResults.reminders?.length > 0 && (
+                        <div>
+                          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Reminders</div>
+                          {searchResults.reminders.map(rm => (
+                            <div key={rm.id} onClick={() => { setSelectedDate(rm.date.split('T')[0]); openModal(null, rm, 'reminder'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
+                              <Bell size={16} className="text-purple-500" />
+                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{rm.title}</div><div className="text-xs text-gray-500">{new Date(rm.date).toLocaleDateString()}</div></div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {!searchResults.events?.length && !searchResults.notes?.length && !searchResults.reminders?.length && (
+                        <div className="p-4 text-center text-sm text-gray-500">No results found for "{searchQuery}"</div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="flex items-center bg-white p-1.5 rounded-xl shadow-sm border border-gray-100">
+            <button onClick={prevMonth} className="p-2 hover:bg-gray-50 rounded-lg text-gray-600 transition-colors">
+              <ChevronLeft size={18} />
+            </button>
+            <span className="font-bold text-gray-800 min-w-[130px] text-center text-sm">
+              {monthNames[month]} {year}
+            </span>
+            <button onClick={nextMonth} className="p-2 hover:bg-gray-50 rounded-lg text-gray-600 transition-colors">
+              <ChevronRight size={18} />
+            </button>
+          </div>
+          <button onClick={goToToday} className="px-4 py-2.5 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
             Today
           </button>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-soft border border-gray-50 flex flex-col overflow-hidden">
+      <div className="flex-1 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col overflow-hidden relative">
+        {isMonthLoading && (
+          <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+          </div>
+        )}
+        
         {/* Days Header */}
         <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/50">
           {dayNames.map(day => (
-            <div key={day} className="py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <div key={day} className="py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
               {day}
             </div>
           ))}
@@ -136,47 +388,50 @@ export default function Calendar() {
         <div className="flex-1 grid grid-cols-7 grid-rows-5 gap-px bg-gray-100">
           {/* Empty cells for padding */}
           {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="bg-white p-2 opacity-50"></div>
+            <div key={`empty-${i}`} className="bg-white/50 p-2 opacity-50"></div>
           ))}
           
           {/* Days */}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayEvents = events[dateStr] || [];
+            const dayData = groupedData[dateStr] || { events: [], notes: [], reminders: [] };
+            const dayHolidays = holidaysMap[dateStr] || [];
             const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
 
             return (
               <div 
                 key={day} 
-                className="bg-white p-2 flex flex-col hover:bg-gray-50 transition-colors cursor-pointer group min-h-[100px]"
+                className="bg-white p-2 flex flex-col hover:bg-gray-50 transition-colors cursor-pointer group min-h-[120px]"
                 onClick={(e) => {
-                  if (e.target === e.currentTarget || e.target.tagName === 'SPAN') openModal(day);
+                  if (e.target === e.currentTarget || e.target.tagName === 'SPAN' || e.target.tagName === 'DIV') openModal(day);
                 }}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-medium ${isToday ? 'bg-primary text-white' : 'text-gray-700 group-hover:bg-gray-100'}`}>
+                  <span className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold ${isToday ? 'bg-blue-600 text-white shadow-md shadow-blue-200' : 'text-gray-700 group-hover:bg-gray-200'}`}>
                     {day}
                   </span>
                   <button 
                     onClick={(e) => { e.stopPropagation(); openModal(day); }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-primary transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                   >
                     <Plus size={16} />
                   </button>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto space-y-1 mt-1 no-scrollbar">
-                  {dayEvents.map(ev => (
+                <div className="flex-1 overflow-y-auto space-y-1 mt-1 no-scrollbar pr-1">
+                  {dayHolidays.map((h, i) => (
                     <div 
-                      key={ev.id}
-                      onClick={(e) => { e.stopPropagation(); openModal(day, ev); }}
-                      className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 truncate border border-blue-100/50 hover:bg-blue-100 transition-colors"
-                      title={ev.title}
+                      key={`hol-${i}`}
+                      className={`text-xs px-2 py-1 rounded truncate border ${h.type === 'IN' ? 'bg-orange-50 text-orange-700 border-orange-100/50' : 'bg-green-50 text-green-700 border-green-100/50'}`}
+                      title={h.name}
                     >
-                      {ev.startTime} {ev.title}
+                      {h.type === 'IN' ? '🇮🇳' : '🌎'} {h.name}
                     </div>
                   ))}
+                  {dayData.events.map(item => renderItemPill(item, 'event', day))}
+                  {dayData.reminders.map(item => renderItemPill(item, 'reminder', day))}
+                  {dayData.notes.map(item => renderItemPill(item, 'note', day))}
                 </div>
               </div>
             );
@@ -184,78 +439,128 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* Event Modal */}
+      {/* Item Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100"
+              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100"
             >
               <div className="flex justify-between items-center mb-5">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {editingEvent ? 'Edit Event' : 'New Event'}
+                <h2 className="text-xl font-black text-gray-900">
+                  {editingItem ? `Edit ${editingItem.type.charAt(0).toUpperCase() + editingItem.type.slice(1)}` : 'Create New Item'}
                 </h2>
-                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100">
+                <button onClick={closeModal} className="text-gray-400 hover:bg-gray-100 p-1.5 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={saveEvent} className="space-y-4">
+              {!editingItem && (
+                <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
+                  {['event', 'note', 'reminder'].map(tab => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 py-2 text-sm font-bold rounded-lg capitalize transition-all ${activeTab === tab ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <form onSubmit={handleSave} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">Title</label>
                   <input 
                     type="text" 
                     required
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    placeholder="e.g. Team Meeting"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm"
+                    placeholder={`e.g. ${activeTab === 'event' ? 'Team Sync' : activeTab === 'note' ? 'Meeting Minutes' : 'Follow up with client'}`}
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                {activeTab === 'event' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">Start Time</label>
+                      <input 
+                        type="time" 
+                        required
+                        value={startTime}
+                        onChange={e => setStartTime(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1.5">End Time</label>
+                      <input 
+                        type="time" 
+                        required
+                        value={endTime}
+                        onChange={e => setEndTime(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'reminder' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Reminder Time</label>
                     <input 
                       type="time" 
                       required
                       value={startTime}
                       onChange={e => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                    <input 
-                      type="time" 
-                      required
-                      value={endTime}
-                      onChange={e => setEndTime(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-2">
+                    <Tag size={14} className="text-gray-400" />
+                    Category (Optional)
+                  </label>
+                  <select
+                    value={categoryId}
+                    onChange={e => setCategoryId(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm appearance-none"
+                  >
+                    <option value="">No Category</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                    {activeTab === 'note' ? 'Content' : 'Description'}
+                  </label>
                   <textarea 
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                    rows="3"
-                    placeholder="Add details..."
+                    required={activeTab === 'note'}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none font-medium text-gray-900 text-sm"
+                    rows={activeTab === 'note' ? "5" : "3"}
+                    placeholder={activeTab === 'note' ? "Write your note here..." : "Add details..."}
                   ></textarea>
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  {editingEvent && (
+                <div className="flex items-center gap-3 pt-6 border-t border-gray-100">
+                  {editingItem && (
                     <button 
                       type="button" 
-                      onClick={deleteEvent}
-                      className="px-4 py-2 text-red-600 hover:bg-red-50 font-medium rounded-xl transition-colors"
+                      onClick={handleDelete}
+                      className="px-5 py-2.5 text-red-600 bg-red-50 hover:bg-red-100 font-bold rounded-xl transition-colors text-sm"
                     >
                       Delete
                     </button>
@@ -264,15 +569,15 @@ export default function Calendar() {
                   <button 
                     type="button" 
                     onClick={closeModal}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 font-medium rounded-xl transition-colors"
+                    className="px-5 py-2.5 text-gray-600 hover:bg-gray-100 font-bold rounded-xl transition-colors text-sm"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
-                    className="px-4 py-2 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-colors shadow-sm"
+                    className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200 text-sm flex items-center gap-2"
                   >
-                    Save
+                    Save {activeTab}
                   </button>
                 </div>
               </form>
