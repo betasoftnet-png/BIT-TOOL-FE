@@ -404,7 +404,7 @@ export default function Calendar() {
         </div>
         
         {/* Calendar Grid */}
-        <div className="flex-1 grid grid-cols-7 grid-rows-5 gap-px bg-gray-100">
+        <div className="flex-1 grid grid-cols-7 auto-rows-[minmax(120px,1fr)] gap-px bg-gray-100 overflow-y-auto">
           {/* Empty cells for padding */}
           {Array.from({ length: firstDay }).map((_, i) => (
             <div key={`empty-${i}`} className="bg-white/50 p-2 opacity-50"></div>
