@@ -30,6 +30,9 @@ export default function Calendar() {
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
   const [categoryId, setCategoryId] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryColor, setNewCategoryColor] = useState('#3B82F6');
 
   // Setup Month Bounds
   const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -170,6 +173,22 @@ export default function Calendar() {
 
   // Mutations
   const invalidateMonth = () => queryClient.invalidateQueries(['calendar-month', year, month]);
+
+  const createCategoryMutation = useMutation({
+    mutationFn: (data) => calendarService.createCategory(data),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['calendar-categories'] });
+      setCategoryId(res.data.id);
+      setIsCreatingCategory(false);
+      setNewCategoryName('');
+    }
+  });
+
+  const handleCreateCategory = (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+    createCategoryMutation.mutate({ name: newCategoryName, color: newCategoryColor });
+  };
 
   const eventMutation = useMutation({
     mutationFn: (data) => editingItem ? calendarService.updateEvent(editingItem.data.id, data) : calendarService.createEvent(data),
@@ -529,16 +548,53 @@ export default function Calendar() {
                     <Tag size={14} className="text-gray-400" />
                     Category (Optional)
                   </label>
-                  <select
-                    value={categoryId}
-                    onChange={e => setCategoryId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm appearance-none"
-                  >
-                    <option value="">No Category</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  {!isCreatingCategory ? (
+                    <select
+                      value={categoryId}
+                      onChange={e => {
+                        if (e.target.value === 'NEW') setIsCreatingCategory(true);
+                        else setCategoryId(e.target.value);
+                      }}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-gray-900 text-sm appearance-none"
+                    >
+                      <option value="">No Category</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                      <option value="NEW" className="font-bold text-blue-600">+ Add New Category</option>
+                    </select>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="color" 
+                        value={newCategoryColor}
+                        onChange={e => setNewCategoryColor(e.target.value)}
+                        className="w-10 h-10 rounded-xl cursor-pointer border-0 p-0 bg-transparent"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Category Name"
+                        value={newCategoryName}
+                        onChange={e => setNewCategoryName(e.target.value)}
+                        className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-medium text-sm"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={handleCreateCategory}
+                        disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
+                        className="px-3 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 text-sm disabled:opacity-50"
+                      >
+                        Add
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsCreatingCategory(false)}
+                        className="px-2 py-2 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
