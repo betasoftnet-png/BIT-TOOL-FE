@@ -224,19 +224,23 @@ export default function Calendar() {
     if (!title.trim()) return;
 
     const basePayload = { title, categoryId: categoryId || null };
-    
+    const getLocalDateObj = (dateStr, timeStr) => {
+      const [y, m, d] = dateStr.split('-');
+      const [hr, min] = timeStr.split(':');
+      return new Date(y, m - 1, d, hr, min, 0);
+    };
+
     if (activeTab === 'event') {
-      const startISO = new Date(`${selectedDate}T${startTime}:00.000Z`).toISOString();
-      const endISO = new Date(`${selectedDate}T${endTime}:00.000Z`).toISOString();
+      const startISO = getLocalDateObj(selectedDate, startTime).toISOString();
+      const endISO = getLocalDateObj(selectedDate, endTime).toISOString();
       eventMutation.mutate({ ...basePayload, description, startTime: startISO, endTime: endISO });
     } 
     else if (activeTab === 'note') {
-      const dateISO = new Date(`${selectedDate}T00:00:00.000Z`).toISOString();
+      const dateISO = getLocalDateObj(selectedDate, '00:00').toISOString();
       noteMutation.mutate({ ...basePayload, content: description, date: dateISO });
     } 
     else if (activeTab === 'reminder') {
-      // Time is repurposed in startTime state
-      const dateISO = new Date(`${selectedDate}T${startTime}:00.000Z`).toISOString();
+      const dateISO = getLocalDateObj(selectedDate, startTime).toISOString();
       reminderMutation.mutate({ ...basePayload, description, date: dateISO, time: startTime });
     }
   };
