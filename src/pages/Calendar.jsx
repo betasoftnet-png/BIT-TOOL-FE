@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Plus, Clock, FileText, CheckCircle, Search, Bell, AlignLeft, Tag } from 'lucide-react';
 import Holidays from 'date-holidays';
