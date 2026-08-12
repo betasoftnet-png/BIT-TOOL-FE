@@ -17,7 +17,7 @@ const tools = [
   { path: '/calendar', name: 'Calendar', description: 'Manage your schedule', icon: CalendarIcon, color: 'bg-purple-50 text-purple-600' },
   { path: '/contacts', name: 'Contacts', description: 'Address book', icon: Users, color: 'bg-green-50 text-green-600' },
   { path: '/translator', name: 'Translator', description: 'Multilingual support', icon: Languages, color: 'bg-orange-50 text-orange-600' },
-  { path: '/lens', name: 'Lens', description: 'Scan & recognize', icon: Camera, color: 'bg-pink-50 text-pink-600' },
+  // { path: '/lens', name: 'Lens', description: 'Scan & recognize', icon: Camera, color: 'bg-pink-50 text-pink-600' },
   { path: '/weather', name: 'Weather', description: 'Local forecasts', icon: CloudRain, color: 'bg-cyan-50 text-cyan-600' },
   { path: '/news', name: 'News Feed', description: 'Latest updates', icon: Newspaper, color: 'bg-red-50 text-red-600' },
   { path: '/keyboard', name: 'Keyboard', description: 'Custom inputs', icon: KeyboardIcon, color: 'bg-indigo-50 text-indigo-600' },
