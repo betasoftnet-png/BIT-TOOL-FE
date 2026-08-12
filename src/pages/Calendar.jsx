@@ -20,6 +20,7 @@ export default function Calendar() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDayViewOpen, setIsDayViewOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [activeTab, setActiveTab] = useState('event'); // 'event', 'note', 'reminder'
   const [editingItem, setEditingItem] = useState(null); // { type: 'event'|'note'|'reminder', data: {...} }
@@ -74,9 +75,19 @@ export default function Calendar() {
     enabled: searchQuery.length > 1
   });
 
+  const dayViewStart = isDayViewOpen && selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null;
+  const dayViewEnd = isDayViewOpen && selectedDate ? new Date(`${selectedDate}T23:59:59.999Z`).toISOString() : null;
+
+  const { data: dayViewDataObj, isLoading: isDayViewLoading } = useQuery({
+    queryKey: ['calendar-day-view', selectedDate],
+    queryFn: () => calendarService.search('', { startDate: dayViewStart, endDate: dayViewEnd, allApps: true }),
+    enabled: isDayViewOpen && !!selectedDate
+  });
+
   const monthData = monthDataObj?.data || { events: [], notes: [], reminders: [] };
   const categories = categoriesObj?.data || [];
   const searchResults = searchResultsObj?.data || { events: [], notes: [], reminders: [] };
+  const dayViewData = dayViewDataObj?.data || { events: [], notes: [], reminders: [] };
 
   // Data processing for grid
   const groupedData = useMemo(() => {
@@ -145,6 +156,18 @@ export default function Calendar() {
   }, []);
 
   // Modal Handlers
+  const openDayView = (day) => {
+    if (day) {
+      const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      setSelectedDate(formattedDate);
+    }
+    setIsDayViewOpen(true);
+  };
+
+  const closeDayView = () => {
+    setIsDayViewOpen(false);
+  };
+
   const openModal = (day, itemToEdit = null, type = 'event') => {
     let dateStr = selectedDate;
     if (day) {
@@ -476,7 +499,7 @@ export default function Calendar() {
                 key={day} 
                 className="bg-white p-2 flex flex-col hover:bg-gray-50 transition-colors cursor-pointer group min-h-[120px]"
                 onClick={(e) => {
-                  if (e.target === e.currentTarget || e.target.tagName === 'SPAN' || e.target.tagName === 'DIV') openModal(day);
+                  if (e.target === e.currentTarget || e.target.tagName === 'SPAN' || e.target.tagName === 'DIV') openDayView(day);
                 }}
               >
                 <div className="flex justify-between items-center mb-1">
@@ -510,6 +533,73 @@ export default function Calendar() {
           })}
         </div>
       </div>
+
+      {/* Day View Modal */}
+      <AnimatePresence>
+        {isDayViewOpen && selectedDate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm" onClick={closeDayView}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 flex flex-col max-h-[85vh]"
+            >
+              <div className="flex justify-between items-center mb-5 shrink-0">
+                <h2 className="text-xl font-black text-gray-900">
+                  {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                </h2>
+                <button onClick={closeDayView} className="text-gray-400 hover:bg-gray-100 p-1.5 rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2 space-y-4 no-scrollbar">
+                {isDayViewLoading ? (
+                  <div className="flex justify-center p-8"><div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div></div>
+                ) : (
+                  <>
+                    {(!dayViewData.events?.length && !dayViewData.notes?.length && !dayViewData.reminders?.length) ? (
+                      <div className="text-center p-8 text-gray-500 font-medium">No items scheduled for this day.</div>
+                    ) : (
+                      <>
+                        {dayViewData.events?.length > 0 && (
+                          <div className="space-y-2">
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Events</h3>
+                            {dayViewData.events.map(ev => renderItemPill(ev, 'event', null))}
+                          </div>
+                        )}
+                        {dayViewData.reminders?.length > 0 && (
+                          <div className="space-y-2 pt-2">
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Reminders</h3>
+                            {dayViewData.reminders.map(rm => renderItemPill(rm, 'reminder', null))}
+                          </div>
+                        )}
+                        {dayViewData.notes?.length > 0 && (
+                          <div className="space-y-2 pt-2">
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</h3>
+                            {dayViewData.notes.map(nt => renderItemPill(nt, 'note', null))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-gray-100 shrink-0">
+                <button 
+                  onClick={() => openModal(null)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md shadow-blue-200"
+                >
+                  <Plus size={18} />
+                  Add New Item
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Item Modal */}
       <AnimatePresence>
