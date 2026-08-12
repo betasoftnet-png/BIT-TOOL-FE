@@ -40,8 +40,22 @@ export default function Calendar() {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
   
-  const monthStartStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const monthEndStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+  const monthStartStr = new Date(year, month, 1, 0, 0, 0).toISOString();
+  const monthEndStr = new Date(year, month, daysInMonth, 23, 59, 59, 999).toISOString();
+
+  // Helper to format ISO string to local YYYY-MM-DD
+  const getLocalDayStr = (isoString) => {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  // Helper to format ISO string to local HH:mm
+  const getLocalTimeStr = (isoString) => {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
 
   // Queries
   const { data: monthDataObj, isLoading: isMonthLoading } = useQuery({
@@ -69,21 +83,21 @@ export default function Calendar() {
     const map = {};
     if (monthData.events) {
       monthData.events.forEach(ev => {
-        const d = ev.startTime.split('T')[0];
+        const d = getLocalDayStr(ev.startTime);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].events.push(ev);
       });
     }
     if (monthData.notes) {
       monthData.notes.forEach(nt => {
-        const d = nt.date.split('T')[0];
+        const d = getLocalDayStr(nt.date);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].notes.push(nt);
       });
     }
     if (monthData.reminders) {
       monthData.reminders.forEach(rm => {
-        const d = rm.date.split('T')[0];
+        const d = getLocalDayStr(rm.date);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].reminders.push(rm);
       });
@@ -147,8 +161,8 @@ export default function Calendar() {
       
       if (type === 'event') {
         setDescription(itemToEdit.description || '');
-        setStartTime(new Date(itemToEdit.startTime).toISOString().substr(11, 5));
-        setEndTime(new Date(itemToEdit.endTime).toISOString().substr(11, 5));
+        setStartTime(getLocalTimeStr(itemToEdit.startTime));
+        setEndTime(getLocalTimeStr(itemToEdit.endTime));
       } else if (type === 'note') {
         setDescription(itemToEdit.content || '');
       } else if (type === 'reminder') {
@@ -255,7 +269,7 @@ export default function Calendar() {
   const renderItemPill = (item, type, day) => {
     let bg = 'bg-blue-50 text-blue-700 border-blue-100/50 hover:bg-blue-100'; // event
     let icon = <CalendarIcon size={10} className="mr-1 inline" />;
-    let timeOrLabel = item.startTime ? new Date(item.startTime).toISOString().substr(11, 5) : '';
+    let timeOrLabel = item.startTime ? getLocalTimeStr(item.startTime) : '';
     
     if (type === 'note') {
       bg = 'bg-yellow-50 text-yellow-700 border-yellow-100/50 hover:bg-yellow-100';
