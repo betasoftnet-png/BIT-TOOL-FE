@@ -60,7 +60,7 @@ export default function Calendar() {
   // Queries
   const { data: monthDataObj, isLoading: isMonthLoading } = useQuery({
     queryKey: ['calendar-month', year, month],
-    queryFn: () => calendarService.search('', { startDate: monthStartStr, endDate: monthEndStr })
+    queryFn: () => calendarService.search('', { startDate: monthStartStr, endDate: monthEndStr, allApps: true })
   });
   
   const { data: categoriesObj } = useQuery({
@@ -70,7 +70,7 @@ export default function Calendar() {
 
   const { data: searchResultsObj, isLoading: isSearching } = useQuery({
     queryKey: ['calendar-search', searchQuery],
-    queryFn: () => calendarService.search(searchQuery),
+    queryFn: () => calendarService.search(searchQuery, { allApps: true }),
     enabled: searchQuery.length > 1
   });
 
@@ -268,17 +268,17 @@ export default function Calendar() {
   // Rendering Helpers
   const renderItemPill = (item, type, day) => {
     let bg = 'bg-blue-50 text-blue-700 border-blue-100/50 hover:bg-blue-100'; // event
-    let icon = <CalendarIcon size={10} className="mr-1 inline" />;
+    let icon = <CalendarIcon size={10} className="mr-1 inline shrink-0" />;
     let timeOrLabel = item.startTime ? getLocalTimeStr(item.startTime) : '';
     
     if (type === 'note') {
       bg = 'bg-yellow-50 text-yellow-700 border-yellow-100/50 hover:bg-yellow-100';
-      icon = <FileText size={10} className="mr-1 inline text-yellow-600" />;
+      icon = <FileText size={10} className="mr-1 inline text-yellow-600 shrink-0" />;
       timeOrLabel = '';
     } else if (type === 'reminder') {
       const isCompleted = item.status === 'completed';
       bg = isCompleted ? 'bg-gray-100 text-gray-500 border-gray-200 line-through' : 'bg-purple-50 text-purple-700 border-purple-100/50 hover:bg-purple-100';
-      icon = <Bell size={10} className={`mr-1 inline ${isCompleted ? 'text-gray-400' : 'text-purple-600'}`} />;
+      icon = <Bell size={10} className={`mr-1 inline shrink-0 ${isCompleted ? 'text-gray-400' : 'text-purple-600'}`} />;
       timeOrLabel = item.time || '';
     }
 
@@ -286,17 +286,22 @@ export default function Calendar() {
       <div 
         key={`${type}-${item.id}`}
         onClick={(e) => { e.stopPropagation(); openModal(day, item, type); }}
-        className={`text-xs px-2 py-1 rounded truncate border transition-colors cursor-pointer flex items-center ${bg}`}
+        className={`text-xs px-2 py-1 rounded truncate border transition-colors cursor-pointer flex items-center gap-1 ${bg}`}
         title={item.title}
       >
         {icon}
-        <span className="font-medium mr-1">{timeOrLabel}</span>
+        {item.applicationName && item.applicationName !== 'Bit Tool' && (
+          <span className="bg-white/60 text-[9px] px-1 rounded-sm uppercase tracking-wider shadow-sm font-bold opacity-90 shrink-0">
+            {item.applicationName.split(' ')[0]}
+          </span>
+        )}
+        <span className="font-medium shrink-0">{timeOrLabel}</span>
         <span className="truncate">{item.title}</span>
         
         {type === 'reminder' && item.status !== 'completed' && (
           <button 
             onClick={(e) => { e.stopPropagation(); completeReminderMutation.mutate(item.id); }}
-            className="ml-auto hover:text-green-600 pl-1"
+            className="ml-auto hover:text-green-600 pl-1 shrink-0"
             title="Mark Complete"
           >
             <CheckCircle size={12} />
@@ -349,8 +354,18 @@ export default function Calendar() {
                           <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Events</div>
                           {searchResults.events.map(ev => (
                             <div key={ev.id} onClick={() => { setSelectedDate(ev.startTime.split('T')[0]); openModal(null, ev, 'event'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
-                              <CalendarIcon size={16} className="text-blue-500" />
-                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{ev.title}</div><div className="text-xs text-gray-500">{new Date(ev.startTime).toLocaleDateString()}</div></div>
+                              <CalendarIcon size={16} className="text-blue-500 shrink-0" />
+                              <div className="overflow-hidden flex-1">
+                                <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
+                                  {ev.title}
+                                  {ev.applicationName && ev.applicationName !== 'Bit Tool' && (
+                                    <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                      {ev.applicationName.split(' ')[0]}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500">{new Date(ev.startTime).toLocaleDateString()}</div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -360,8 +375,18 @@ export default function Calendar() {
                           <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Notes</div>
                           {searchResults.notes.map(nt => (
                             <div key={nt.id} onClick={() => { setSelectedDate(nt.date.split('T')[0]); openModal(null, nt, 'note'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
-                              <FileText size={16} className="text-yellow-500" />
-                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{nt.title}</div><div className="text-xs text-gray-500">{new Date(nt.date).toLocaleDateString()}</div></div>
+                              <FileText size={16} className="text-yellow-500 shrink-0" />
+                              <div className="overflow-hidden flex-1">
+                                <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
+                                  {nt.title}
+                                  {nt.applicationName && nt.applicationName !== 'Bit Tool' && (
+                                    <span className="bg-yellow-100 text-yellow-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                      {nt.applicationName.split(' ')[0]}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500">{new Date(nt.date).toLocaleDateString()}</div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -371,8 +396,18 @@ export default function Calendar() {
                           <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 mb-1">Reminders</div>
                           {searchResults.reminders.map(rm => (
                             <div key={rm.id} onClick={() => { setSelectedDate(rm.date.split('T')[0]); openModal(null, rm, 'reminder'); setIsSearchFocused(false); }} className="px-3 py-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3">
-                              <Bell size={16} className="text-purple-500" />
-                              <div className="overflow-hidden"><div className="text-sm font-medium text-gray-800 truncate">{rm.title}</div><div className="text-xs text-gray-500">{new Date(rm.date).toLocaleDateString()}</div></div>
+                              <Bell size={16} className="text-purple-500 shrink-0" />
+                              <div className="overflow-hidden flex-1">
+                                <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
+                                  {rm.title}
+                                  {rm.applicationName && rm.applicationName !== 'Bit Tool' && (
+                                    <span className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                      {rm.applicationName.split(' ')[0]}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-gray-500">{new Date(rm.date).toLocaleDateString()}</div>
+                              </div>
                             </div>
                           ))}
                         </div>
