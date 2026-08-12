@@ -17,6 +17,7 @@ export default function Calendar() {
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [selectedApp, setSelectedApp] = useState('All Apps');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,35 +87,66 @@ export default function Calendar() {
 
   const monthData = monthDataObj?.data || { events: [], notes: [], reminders: [] };
   const categories = categoriesObj?.data || [];
-  const searchResults = searchResultsObj?.data || { events: [], notes: [], reminders: [] };
-  const dayViewData = dayViewDataObj?.data || { events: [], notes: [], reminders: [] };
+  const rawSearchResults = searchResultsObj?.data || { events: [], notes: [], reminders: [] };
+  const rawDayViewData = dayViewDataObj?.data || { events: [], notes: [], reminders: [] };
+
+  const availableApps = useMemo(() => {
+    const apps = new Set(['All Apps', 'Bit Tool']);
+    const extract = (arr) => arr?.forEach(item => { if (item.applicationName) apps.add(item.applicationName); });
+    extract(monthData.events);
+    extract(monthData.notes);
+    extract(monthData.reminders);
+    return Array.from(apps);
+  }, [monthData]);
+
+  const filterByApp = useCallback((arr) => {
+    if (!arr) return [];
+    if (selectedApp === 'All Apps') return arr;
+    return arr.filter(item => (item.applicationName || 'Bit Tool') === selectedApp);
+  }, [selectedApp]);
+
+  const searchResults = useMemo(() => ({
+    events: filterByApp(rawSearchResults.events),
+    notes: filterByApp(rawSearchResults.notes),
+    reminders: filterByApp(rawSearchResults.reminders)
+  }), [rawSearchResults, filterByApp]);
+
+  const dayViewData = useMemo(() => ({
+    events: filterByApp(rawDayViewData.events),
+    notes: filterByApp(rawDayViewData.notes),
+    reminders: filterByApp(rawDayViewData.reminders)
+  }), [rawDayViewData, filterByApp]);
 
   // Data processing for grid
   const groupedData = useMemo(() => {
     const map = {};
-    if (monthData.events) {
-      monthData.events.forEach(ev => {
+    const fEvents = filterByApp(monthData.events);
+    const fNotes = filterByApp(monthData.notes);
+    const fReminders = filterByApp(monthData.reminders);
+
+    if (fEvents) {
+      fEvents.forEach(ev => {
         const d = getLocalDayStr(ev.startTime);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].events.push(ev);
       });
     }
-    if (monthData.notes) {
-      monthData.notes.forEach(nt => {
+    if (fNotes) {
+      fNotes.forEach(nt => {
         const d = getLocalDayStr(nt.date);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].notes.push(nt);
       });
     }
-    if (monthData.reminders) {
-      monthData.reminders.forEach(rm => {
+    if (fReminders) {
+      fReminders.forEach(rm => {
         const d = getLocalDayStr(rm.date);
         if (!map[d]) map[d] = { events: [], notes: [], reminders: [] };
         map[d].reminders.push(rm);
       });
     }
     return map;
-  }, [monthData]);
+  }, [monthData, filterByApp]);
 
   // Holidays
   const holidaysMap = useMemo(() => {
@@ -349,6 +381,17 @@ export default function Calendar() {
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto flex-wrap">
+          {/* App Filter Dropdown */}
+          <select 
+            value={selectedApp} 
+            onChange={(e) => setSelectedApp(e.target.value)}
+            className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm font-medium bg-white cursor-pointer"
+          >
+            {availableApps.map(app => (
+              <option key={app} value={app}>{app}</option>
+            ))}
+          </select>
+
           {/* Unified Search */}
           <div className="relative w-full md:w-72" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
