@@ -11,7 +11,7 @@ export default function Navbar({ toggleMobileMenu }) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({
           name: payload.sub || 'User',
-          avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
+          avatar: null
         });
         
         // Fetch full user details asynchronously
@@ -26,7 +26,7 @@ export default function Navbar({ toggleMobileMenu }) {
             setUser({
               ...data.data,
               name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
-              avatar: data.data.profilePicture || 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+              avatar: data.data.profilePicture || null,
               email: data.data.email,
               username: data.data.username,
               role: data.data.role,
@@ -93,20 +93,32 @@ export default function Navbar({ toggleMobileMenu }) {
               <p className="text-sm font-medium text-gray-700 leading-tight">{user.name}</p>
               {/* <p className="text-xs text-gray-500">{user.plan}</p> */}
             </div>
-            <img 
-              src={user.avatar} 
-              alt="Profile Avatar" 
-              className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
-            />
+            {user.avatar ? (
+              <img 
+                src={user.avatar} 
+                alt="Profile Avatar" 
+                className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border border-blue-700 shadow-sm">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            )}
             {/* Dropdown Menu */}
             <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
               <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={user.avatar} 
-                    alt="Profile Avatar" 
-                    className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
-                  />
+                  {user.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt="Profile Avatar" 
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg border border-blue-700 shadow-sm shrink-0">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -115,11 +127,11 @@ export default function Navbar({ toggleMobileMenu }) {
               </div>
               
               <div className="px-4 py-3 border-b border-gray-100">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   {user.role && (
                     <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">{user.role.replace('_', ' ')}</span>
                   )}
-                </div>
+                </div> */}
               </div>
 
               <div className="p-2 space-y-1">
