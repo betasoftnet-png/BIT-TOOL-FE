@@ -45,7 +45,27 @@ export default function AuthCallback() {
         const result = await response.json();
         
         if (result.success && result.data && result.data.access_token) {
-          localStorage.setItem('bnx_auth_token', result.data.access_token);
+          const newToken = result.data.access_token;
+          
+          let tokens = [];
+          try {
+            const storedTokens = localStorage.getItem('bnx_auth_tokens');
+            if (storedTokens) {
+              tokens = JSON.parse(storedTokens);
+            } else {
+              const legacyToken = localStorage.getItem('bnx_auth_token');
+              if (legacyToken) tokens = [legacyToken];
+            }
+          } catch(e) {}
+          
+          if (!tokens.includes(newToken)) {
+            tokens.push(newToken);
+          }
+          
+          localStorage.setItem('bnx_auth_tokens', JSON.stringify(tokens));
+          localStorage.setItem('bnx_auth_token', newToken);
+          localStorage.setItem('bnx_active_token_index', (tokens.indexOf(newToken)).toString());
+
           // Force a full reload to update navbar and any other components
           window.location.href = '/';
         } else {
