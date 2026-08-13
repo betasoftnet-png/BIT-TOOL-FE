@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Menu, LogOut, LogIn } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, LogIn, Settings } from 'lucide-react';
 
 export default function Navbar({ toggleMobileMenu }) {
   const [user, setUser] = useState(null);
@@ -24,8 +24,14 @@ export default function Navbar({ toggleMobileMenu }) {
         .then(data => {
           if (data.success && data.data) {
             setUser({
+              ...data.data,
               name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
-              avatar: data.data.profilePicture || 'https://i.pravatar.cc/150?u=a042581f4e29026704d'
+              avatar: data.data.profilePicture || 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+              email: data.data.email,
+              username: data.data.username,
+              role: data.data.role,
+              accountType: data.data.accountType,
+              organizationName: data.data.organization?.name
             });
           }
         })
@@ -48,6 +54,12 @@ export default function Navbar({ toggleMobileMenu }) {
     localStorage.removeItem('bnx_auth_token');
     setUser(null);
   };
+
+  const handleManageAccount = () => {
+    const token = localStorage.getItem('bnx_auth_token');
+    window.open('https://account.beta-softnet.com?token=' + token, '_blank');
+  };
+
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 md:px-8 z-10 sticky top-0">
       <div className="flex items-center gap-4">
@@ -87,11 +99,40 @@ export default function Navbar({ toggleMobileMenu }) {
               className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
             />
             {/* Dropdown Menu */}
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <div className="py-1">
+            <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+              <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={user.avatar} 
+                    alt="Profile Avatar" 
+                    className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  {user.role && (
+                    <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">{user.role.replace('_', ' ')}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-2 space-y-1">
+                <button 
+                  onClick={handleManageAccount}
+                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 font-medium transition-colors"
+                >
+                  <Settings size={16} />
+                  Manage account
+                </button>
                 <button 
                   onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2 font-medium transition-colors"
                 >
                   <LogOut size={16} />
                   Sign out
