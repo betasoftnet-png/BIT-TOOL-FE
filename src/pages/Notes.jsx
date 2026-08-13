@@ -39,8 +39,15 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
       <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-white/40 to-transparent"></div>
 
       <div className="flex justify-between items-start mb-3">
-        {note.title && <h3 className="font-semibold text-gray-900 text-lg leading-tight pr-8 line-clamp-2">{note.title}</h3>}
-        {!note.title && <div className="h-2"></div>}
+        <div className="flex flex-col gap-1 pr-8">
+          {note.applicationName && (
+            <span className="text-[10px] font-bold tracking-wider text-gray-500 uppercase bg-gray-900/5 px-2 py-0.5 rounded-full self-start">
+              {note.applicationName}
+            </span>
+          )}
+          {note.title && <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-2">{note.title}</h3>}
+          {!note.title && !note.applicationName && <div className="h-2"></div>}
+        </div>
         
         <button 
           onClick={(e) => { e.stopPropagation(); handleTogglePin(e, note); }}
@@ -102,18 +109,28 @@ export default function Notes() {
   const [isTakingNote, setIsTakingNote] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '', color: '#ffffff', isPinned: false });
   const [editingNote, setEditingNote] = useState(null);
+  const [selectedApp, setSelectedApp] = useState('All');
   const takeNoteRef = useRef(null);
   const editModalRef = useRef(null);
 
   const { data: notesObj, isLoading } = useQuery({
     queryKey: ['notes'],
-    queryFn: () => noteService.getNotes(),
+    queryFn: () => noteService.getNotes({ allApps: true }),
     retry: false
   });
 
   const notes = notesObj?.data || [];
-  const pinnedNotes = notes.filter(n => n.isPinned && !n.isArchived);
-  const otherNotes = notes.filter(n => !n.isPinned && !n.isArchived);
+  
+  // Extract unique app names for the filter
+  const availableApps = ['All', ...new Set(notes.map(n => n.applicationName).filter(Boolean))];
+
+  // Filter notes by selected app
+  const filteredNotes = selectedApp === 'All' 
+    ? notes 
+    : notes.filter(n => n.applicationName === selectedApp);
+
+  const pinnedNotes = filteredNotes.filter(n => n.isPinned && !n.isArchived);
+  const otherNotes = filteredNotes.filter(n => !n.isPinned && !n.isArchived);
 
   const createMutation = useMutation({
     mutationFn: (data) => noteService.createNote(data),
@@ -292,6 +309,24 @@ export default function Notes() {
           </div>
         ) : (
           <div className="relative z-10">
+            {availableApps.length > 1 && (
+              <div className="flex flex-wrap gap-2 mb-8 pl-2">
+                {availableApps.map(app => (
+                  <button
+                    key={app}
+                    onClick={() => setSelectedApp(app)}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      selectedApp === app 
+                        ? 'bg-gray-900 text-white shadow-md' 
+                        : 'bg-white/50 text-gray-600 hover:bg-white/80 border border-white/60'
+                    }`}
+                  >
+                    {app === 'All' ? 'All Apps' : app}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {pinnedNotes.length > 0 && (
               <div className="mb-14">
                 <div className="flex items-center gap-2 mb-6 pl-2">
