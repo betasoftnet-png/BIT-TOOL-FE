@@ -400,6 +400,21 @@ export default function Weather() {
     enabled: !!coords,
   });
 
+  const fetchLocationName = async () => {
+    if (!coords) return null;
+    const { lat, lon } = coords;
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch location name');
+    return response.json();
+  };
+
+  const { data: locationData, isLoading: isLocationLoading } = useQuery({
+    queryKey: ['locationName', coords?.lat, coords?.lon],
+    queryFn: fetchLocationName,
+    enabled: !!coords,
+  });
+
   // Weather icon
   const getWeatherIcon = (
     isDay,
@@ -467,7 +482,11 @@ export default function Weather() {
               <MapPin size={16} className="text-blue-500" />
 
               {coords
-                ? `Lat: ${coords.lat.toFixed(4)}, Lon: ${coords.lon.toFixed(4)}`
+                ? isLocationLoading
+                  ? 'Determining location name...'
+                  : locationData
+                    ? `${locationData.city || locationData.locality}, ${locationData.principalSubdivision}`
+                    : `Lat: ${coords.lat.toFixed(4)}, Lon: ${coords.lon.toFixed(4)}`
                 : isLocating
                   ? 'Locating...'
                   : 'Location unavailable'}
