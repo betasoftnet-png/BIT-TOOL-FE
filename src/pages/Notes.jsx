@@ -18,7 +18,8 @@ export default function Notes() {
 
   const { data: notesObj, isLoading } = useQuery({
     queryKey: ['notes'],
-    queryFn: () => noteService.getNotes()
+    queryFn: () => noteService.getNotes(),
+    retry: false
   });
 
   const notes = notesObj?.data || [];
@@ -44,16 +45,20 @@ export default function Notes() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] })
   });
 
+  const handleSaveNote = () => {
+    if (newNote.title.trim() || newNote.content.trim()) {
+      createMutation.mutate(newNote);
+    } else {
+      setIsTakingNote(false);
+    }
+  };
+
   // Handle click outside to save new note
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (takeNoteRef.current && !takeNoteRef.current.contains(e.target)) {
         if (isTakingNote) {
-          if (newNote.title.trim() || newNote.content.trim()) {
-            createMutation.mutate(newNote);
-          } else {
-            setIsTakingNote(false);
-          }
+          handleSaveNote();
         }
       }
     };
@@ -203,9 +208,15 @@ export default function Notes() {
                 <div className="flex-1"></div>
                 <button 
                   onClick={() => setIsTakingNote(false)}
-                  className="px-4 py-2 font-bold text-sm rounded-lg hover:bg-black/5 text-gray-700 transition-colors"
+                  className="px-4 py-2 font-bold text-sm rounded-lg hover:bg-black/5 text-gray-500 transition-colors"
                 >
-                  Close
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSaveNote}
+                  className="px-4 py-2 font-bold text-sm rounded-lg hover:bg-black/5 text-gray-900 transition-colors"
+                >
+                  Save
                 </button>
               </div>
             </div>
@@ -249,6 +260,13 @@ export default function Notes() {
                   {otherNotes.map(note => <NoteCard key={note.id} note={note} />)}
                 </AnimatePresence>
               </div>
+            </div>
+          )}
+
+          {notes.length === 0 && !isLoading && (
+            <div className="flex flex-col items-center justify-center p-12 text-gray-400 mt-10 opacity-70">
+              <span className="text-6xl mb-4 grayscale">📝</span>
+              <p className="text-xl font-medium">Notes you add appear here</p>
             </div>
           )}
         </>
