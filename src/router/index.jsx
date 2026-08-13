@@ -6,12 +6,14 @@ import Calculator from '../pages/Calculator';
 import Calendar from '../pages/Calendar';
 import Settings from '../pages/Settings';
 import Contacts from '../pages/Contacts';
+import Notes from '../pages/Notes';
 // import Translator from '../pages/Translator';
 // import Lens from '../pages/Lens';
 import Weather from '../pages/Weather';
-import News from '../pages/News';
+// import News from '../pages/News';
 import Keyboard from '../pages/Keyboard';
 import AuthCallback from '../pages/AuthCallback';
+import PrivateRoute from './PrivateRoute';
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +24,7 @@ export const router = createBrowserRouter([
       { path: '/calculator', element: <Calculator /> },
       { path: '/calendar', element: <Calendar /> },
       { path: '/contacts', element: <Contacts /> },
-      // { path: '/translator', element: <Translator /> },
+      { path: '/notes', element: <Notes /> },
       // { path: '/lens', element: <Lens /> },
       { path: '/weather', element: <Weather /> },
       // { path: '/news', element: <News /> },
