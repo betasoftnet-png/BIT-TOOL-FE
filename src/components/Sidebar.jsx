@@ -40,11 +40,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       )}
     >
       <div className="h-16 flex items-center justify-between px-6 border-b border-gray-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-xl">
-            B
-          </div>
-          <span className="font-semibold text-lg tracking-tight">Bit Tool</span>
+        <div className="flex items-center">
+          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-8 object-contain" />
         </div>
         <button 
           className="lg:hidden text-gray-500 hover:bg-gray-100 p-1 rounded-md"

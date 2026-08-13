@@ -134,10 +134,6 @@ export default function Navbar({ toggleMobileMenu }) {
         >
           <Menu size={20} />
         </button>
-        
-        <div className="flex items-center">
-          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-8" />
-        </div>
 
         {/* Search Bar (UI Only) */}
         <div className="hidden md:flex items-center bg-gray-50 border border-gray-100 rounded-full px-4 py-2 w-64 lg:w-80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-inner">
