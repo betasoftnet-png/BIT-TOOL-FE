@@ -198,11 +198,6 @@ export default function Notes() {
 
   return (
     <div className="relative min-h-screen p-4 md:p-8 overflow-hidden z-0">
-      {/* Glassmorphism Background Blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 blur-[120px] -z-10 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/20 blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-pink-400/20 blur-[100px] -z-10 animate-pulse" style={{ animationDelay: '4s' }}></div>
-
       <div className="max-w-7xl mx-auto">
         
         {/* Sleek Take a note input */}
