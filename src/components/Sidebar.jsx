@@ -17,14 +17,14 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 const menuItems = [
-  { path: '/', name: 'Dashboard', icon: LayoutDashboard },
+  // { path: '/', name: 'Dashboard', icon: LayoutDashboard },
   { path: '/calculator', name: 'Calculator', icon: Calculator },
   { path: '/calendar', name: 'Calendar', icon: CalendarIcon },
   { path: '/contacts', name: 'Contacts', icon: Users },
-  { path: '/translator', name: 'Translator', icon: Languages },
+  // { path: '/translator', name: 'Translator', icon: Languages },
   // { path: '/lens', name: 'Lens', icon: Camera },
   { path: '/weather', name: 'Weather', icon: CloudRain },
-  { path: '/news', name: 'News Feed', icon: Newspaper },
+  // { path: '/news', name: 'News Feed', icon: Newspaper },
   { path: '/keyboard', name: 'Keyboard', icon: KeyboardIcon },
   { path: '/settings', name: 'Settings', icon: SettingsIcon },
 ];
