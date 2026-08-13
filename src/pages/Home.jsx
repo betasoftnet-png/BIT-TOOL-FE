@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -25,11 +25,40 @@ const tools = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('bnx_auth_token');
+      if (!token) return;
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        let name = payload.sub || 'User'; // Fallback to token username
+        
+        const res = await fetch('https://api.bnxmail.com/api/users/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.data && data.data.firstName) {
+          name = data.data.firstName; // Use actual first name if available
+        }
+        
+        // Capitalize first letter for display
+        setUserName(name.charAt(0).toUpperCase() + name.slice(1));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Welcome back, Alex</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+          Welcome back{userName ? `, ${userName}` : ''}
+        </h1>
         <p className="text-gray-500 mt-1">What would you like to do today?</p>
       </div>
 
