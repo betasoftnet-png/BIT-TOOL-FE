@@ -334,7 +334,7 @@ export default function Notes() {
                   <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Pinned Notes</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence>
                     {pinnedNotes.map(note => (
                       <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} onClick={setEditingNote} />
                     ))}
@@ -351,7 +351,7 @@ export default function Notes() {
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence>
                     {otherNotes.map(note => (
                       <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} onClick={setEditingNote} />
                     ))}
