@@ -29,14 +29,14 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.2 }}
-      className="group relative flex flex-col rounded-3xl border border-white/60 p-5 shadow-lg hover:shadow-2xl transition-all cursor-pointer overflow-hidden backdrop-blur-xl bg-white/70 h-full"
+      className="group relative flex flex-col rounded-3xl border border-white/60 p-5 shadow-lg hover:shadow-2xl transition-all cursor-pointer backdrop-blur-xl bg-white/70 h-full"
       style={{ 
         backgroundColor: note.color === '#ffffff' ? 'rgba(255,255,255,0.7)' : note.color,
       }}
       onClick={() => onClick(note)}
     >
       {/* Decorative top gradient edge */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-white/40 to-transparent"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-white/40 to-transparent"></div>
 
       <div className="flex justify-between items-start mb-3">
         {note.title && <h3 className="font-semibold text-gray-900 text-lg leading-tight pr-8 line-clamp-2">{note.title}</h3>}
@@ -67,7 +67,7 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute bottom-full left-0 mb-3 bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 z-20"
+                  className="absolute bottom-full left-0 mb-3 w-[200px] bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 z-50 cursor-default"
                 >
                   {COLORS.map(c => (
                     <div 
@@ -209,7 +209,7 @@ export default function Notes() {
         <div className="max-w-2xl mx-auto mb-16 relative z-10">
           <motion.div 
             ref={takeNoteRef}
-            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgb(0,0,0,0.08)] border border-white/60 overflow-hidden transition-all duration-300"
+            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgb(0,0,0,0.08)] border border-white/60 transition-all duration-300"
             style={{ backgroundColor: newNote.color === '#ffffff' ? 'rgba(255,255,255,0.8)' : newNote.color }}
             animate={{ minHeight: isTakingNote ? 160 : 64 }}
           >
@@ -243,7 +243,7 @@ export default function Notes() {
                   <div className="flex items-center gap-2">
                     <button className="p-2.5 rounded-full text-gray-500 hover:bg-gray-900/10 hover:text-gray-900 transition-colors group relative">
                       <Palette size={20} />
-                      <div className="absolute top-full left-0 mt-3 bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-30 transition-all">
+                      <div className="absolute top-full left-0 mt-3 w-[200px] bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 transition-all cursor-default">
                         {COLORS.map(c => (
                           <div 
                             key={c}
