@@ -13,7 +13,7 @@ import Weather from '../pages/Weather';
 // import News from '../pages/News';
 import Keyboard from '../pages/Keyboard';
 import AuthCallback from '../pages/AuthCallback';
-import PrivateRoute from './PrivateRoute';
+// import PrivateRoute from './PrivateRoute';
 
 export const router = createBrowserRouter([
   {
