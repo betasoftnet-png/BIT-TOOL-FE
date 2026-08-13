@@ -142,6 +142,10 @@ export default function Navbar({ toggleMobileMenu }) {
           <Menu size={20} />
         </button>
         
+        <div className="flex items-center">
+          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-8" />
+        </div>
+
         {/* Search Bar (UI Only) */}
         <div className="hidden md:flex items-center bg-gray-50 border border-gray-100 rounded-full px-4 py-2 w-64 lg:w-80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-inner">
           <Search size={16} className="text-gray-400 mr-2" />
@@ -180,33 +184,59 @@ export default function Navbar({ toggleMobileMenu }) {
             {/* Dropdown Menu */}
             <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col">
               
-              {/* Account List */}
-              <div className="max-h-64 overflow-y-auto">
-                {accounts.map((acc, idx) => (
-                  <div 
-                    key={idx}
-                    onClick={() => handleSwitchAccount(idx)}
-                    className={`p-4 flex items-center gap-3 cursor-pointer transition-colors border-b border-gray-100 ${idx === activeAccountIndex ? 'bg-blue-50/30' : 'hover:bg-gray-50'}`}
-                  >
-                    {acc.avatar ? (
-                      <img 
-                        src={acc.avatar} 
-                        alt="Profile Avatar" 
-                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border border-blue-700 shadow-sm shrink-0">
-                        {acc.name ? acc.name.charAt(0).toUpperCase() : 'U'}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{acc.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{acc.email}</p>
+              {/* Active Account Header */}
+              <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex items-center gap-3">
+                  {activeUser.avatar ? (
+                    <img 
+                      src={activeUser.avatar} 
+                      alt="Profile Avatar" 
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg border border-blue-700 shadow-sm shrink-0">
+                      {activeUser.name ? activeUser.name.charAt(0).toUpperCase() : 'U'}
                     </div>
-                    {idx === activeAccountIndex && <Check size={18} className="text-blue-600 shrink-0" />}
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-900 truncate">{activeUser.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{activeUser.email}</p>
                   </div>
-                ))}
+                  <Check size={18} className="text-blue-600 shrink-0" />
+                </div>
               </div>
+
+              {/* Inactive Account List */}
+              {accounts.length > 1 && (
+                <div className="max-h-48 overflow-y-auto">
+                  {accounts.map((acc, idx) => {
+                    if (idx === activeAccountIndex) return null;
+                    return (
+                      <div 
+                        key={idx}
+                        onClick={() => handleSwitchAccount(idx)}
+                        className="p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        {acc.avatar ? (
+                          <img 
+                            src={acc.avatar} 
+                            alt="Profile Avatar" 
+                            className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center font-bold text-xs border border-gray-600 shadow-sm shrink-0">
+                            {acc.name ? acc.name.charAt(0).toUpperCase() : 'U'}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">{acc.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{acc.email}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="p-2 space-y-1 bg-gray-50/30">
