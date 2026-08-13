@@ -10,7 +10,7 @@ const COLORS = [
   '#e6c9a8', '#e8eaed'
 ];
 
-const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete }) => {
+const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onClick }) => {
   const [showPalette, setShowPalette] = useState(false);
 
   return (
@@ -21,6 +21,7 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete }) =>
       exit={{ opacity: 0, scale: 0.9 }}
       className="group relative rounded-2xl border border-gray-200 p-4 mb-4 break-inside-avoid shadow-sm hover:shadow-md transition-shadow cursor-default"
       style={{ backgroundColor: note.color }}
+      onClick={() => onClick(note)}
     >
       <button 
         onClick={(e) => handleTogglePin(e, note)}
@@ -79,7 +80,9 @@ export default function Notes() {
   const queryClient = useQueryClient();
   const [isTakingNote, setIsTakingNote] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '', color: '#ffffff', isPinned: false });
+  const [editingNote, setEditingNote] = useState(null);
   const takeNoteRef = useRef(null);
+  const editModalRef = useRef(null);
 
   const { data: notesObj, isLoading } = useQuery({
     queryKey: ['notes'],
@@ -121,6 +124,16 @@ export default function Notes() {
     }
   };
 
+  const handleSaveEdit = () => {
+    if (editingNote) {
+      updateMutation.mutate({ 
+        id: editingNote.id, 
+        data: { title: editingNote.title, content: editingNote.content } 
+      });
+      setEditingNote(null);
+    }
+  };
+
   // Handle click outside to save new note
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -129,10 +142,15 @@ export default function Notes() {
           handleSaveNote();
         }
       }
+      if (editModalRef.current && !editModalRef.current.contains(e.target)) {
+        if (editingNote) {
+          handleSaveEdit();
+        }
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isTakingNote, newNote, createMutation]);
+  }, [isTakingNote, newNote, createMutation, editingNote, updateMutation]);
 
   const handleColorChange = (e, noteId, color) => {
     e.stopPropagation();
@@ -256,6 +274,7 @@ export default function Notes() {
                       handleTogglePin={handleTogglePin}
                       handleColorChange={handleColorChange}
                       handleDelete={handleDelete}
+                      onClick={setEditingNote}
                     />
                   ))}
                 </AnimatePresence>
@@ -275,6 +294,7 @@ export default function Notes() {
                       handleTogglePin={handleTogglePin}
                       handleColorChange={handleColorChange}
                       handleDelete={handleDelete}
+                      onClick={setEditingNote}
                     />
                   ))}
                 </AnimatePresence>
@@ -290,6 +310,48 @@ export default function Notes() {
           )}
         </>
       )}
+
+      {/* Edit Note Modal */}
+      <AnimatePresence>
+        {editingNote && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4">
+            <motion.div 
+              ref={editModalRef}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-2xl flex flex-col"
+              style={{ backgroundColor: editingNote.color }}
+            >
+              <div className="p-4 flex flex-col h-full max-h-[80vh]">
+                <input 
+                  type="text" 
+                  placeholder="Title" 
+                  value={editingNote.title || ''}
+                  onChange={e => setEditingNote({...editingNote, title: e.target.value})}
+                  className="w-full text-xl font-bold bg-transparent outline-none placeholder-gray-500 mb-4"
+                />
+                
+                <textarea 
+                  placeholder="Note content..." 
+                  value={editingNote.content || ''}
+                  onChange={e => setEditingNote({...editingNote, content: e.target.value})}
+                  className="w-full resize-none bg-transparent outline-none text-gray-700 min-h-[300px] flex-1 overflow-y-auto"
+                />
+
+                <div className="flex justify-end mt-6">
+                  <button 
+                    onClick={handleSaveEdit}
+                    className="px-6 py-2 font-bold text-sm rounded-lg hover:bg-black/5 text-gray-900 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
