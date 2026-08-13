@@ -10,6 +10,71 @@ const COLORS = [
   '#e6c9a8', '#e8eaed'
 ];
 
+const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete }) => {
+  const [showPalette, setShowPalette] = useState(false);
+
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="group relative rounded-2xl border border-gray-200 p-4 mb-4 break-inside-avoid shadow-sm hover:shadow-md transition-shadow cursor-default"
+      style={{ backgroundColor: note.color }}
+    >
+      <button 
+        onClick={(e) => handleTogglePin(e, note)}
+        className={`absolute top-3 right-3 p-2 rounded-full transition-opacity ${note.isPinned ? 'opacity-100 text-gray-900 bg-black/5' : 'opacity-0 group-hover:opacity-100 text-gray-500 hover:bg-black/5'}`}
+      >
+        {note.isPinned ? <Pin size={18} className="fill-gray-900" /> : <Pin size={18} />}
+      </button>
+
+      {note.title && <h3 className="font-bold text-gray-900 mb-2 pr-8">{note.title}</h3>}
+      {note.content && <p className="text-gray-700 whitespace-pre-wrap text-sm">{note.content}</p>}
+
+      {/* Note Footer Actions */}
+      <div className="mt-4 pt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative">
+        <button 
+          className="p-1.5 rounded-full text-gray-500 hover:bg-black/5"
+          onMouseEnter={() => setShowPalette(true)}
+          onMouseLeave={() => setShowPalette(false)}
+        >
+          <Palette size={16} />
+          <AnimatePresence>
+            {showPalette && (
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 grid grid-cols-4 gap-1 z-10"
+              >
+                {COLORS.map(c => (
+                  <div 
+                    key={c}
+                    onClick={(e) => handleColorChange(e, note.id, c)}
+                    className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer hover:scale-110 transition-transform"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </button>
+        <button className="p-1.5 rounded-full text-gray-500 hover:bg-black/5" title="Archive">
+          <Archive size={16} />
+        </button>
+        <div className="flex-1"></div>
+        <button 
+          onClick={(e) => handleDelete(e, note.id)}
+          className="p-1.5 rounded-full text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors" title="Delete"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function Notes() {
   const queryClient = useQueryClient();
   const [isTakingNote, setIsTakingNote] = useState(false);
@@ -32,17 +97,20 @@ export default function Notes() {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       setNewNote({ title: '', content: '', color: '#ffffff', isPinned: false });
       setIsTakingNote(false);
-    }
+    },
+    onError: (err) => alert(`Failed to create note: ${err.message}`)
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => noteService.updateNote(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }),
+    onError: (err) => alert(`Failed to update note: ${err.message}`)
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => noteService.deleteNote(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }),
+    onError: (err) => alert(`Failed to delete note: ${err.message}`)
   });
 
   const handleSaveNote = () => {
@@ -87,71 +155,6 @@ export default function Notes() {
   const handleDelete = (e, id) => {
     e.stopPropagation();
     deleteMutation.mutate(id);
-  };
-
-  const NoteCard = ({ note }) => {
-    const [showPalette, setShowPalette] = useState(false);
-
-    return (
-      <motion.div 
-        layout
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="group relative rounded-2xl border border-gray-200 p-4 mb-4 break-inside-avoid shadow-sm hover:shadow-md transition-shadow cursor-default"
-        style={{ backgroundColor: note.color }}
-      >
-        <button 
-          onClick={(e) => handleTogglePin(e, note)}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-opacity ${note.isPinned ? 'opacity-100 text-gray-900 bg-black/5' : 'opacity-0 group-hover:opacity-100 text-gray-500 hover:bg-black/5'}`}
-        >
-          {note.isPinned ? <Pin size={18} className="fill-gray-900" /> : <Pin size={18} />}
-        </button>
-
-        {note.title && <h3 className="font-bold text-gray-900 mb-2 pr-8">{note.title}</h3>}
-        {note.content && <p className="text-gray-700 whitespace-pre-wrap text-sm">{note.content}</p>}
-
-        {/* Note Footer Actions */}
-        <div className="mt-4 pt-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity relative">
-          <button 
-            className="p-1.5 rounded-full text-gray-500 hover:bg-black/5"
-            onMouseEnter={() => setShowPalette(true)}
-            onMouseLeave={() => setShowPalette(false)}
-          >
-            <Palette size={16} />
-            <AnimatePresence>
-              {showPalette && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 p-2 grid grid-cols-4 gap-1 z-10"
-                >
-                  {COLORS.map(c => (
-                    <div 
-                      key={c}
-                      onClick={(e) => handleColorChange(e, note.id, c)}
-                      className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer hover:scale-110 transition-transform"
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-          <button className="p-1.5 rounded-full text-gray-500 hover:bg-black/5" title="Archive">
-            <Archive size={16} />
-          </button>
-          <div className="flex-1"></div>
-          <button 
-            onClick={(e) => handleDelete(e, note.id)}
-            className="p-1.5 rounded-full text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors" title="Delete"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </motion.div>
-    );
   };
 
   return (
@@ -246,7 +249,15 @@ export default function Notes() {
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 pl-2">Pinned</h3>
               <div className="columns-1 sm:columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
                 <AnimatePresence>
-                  {pinnedNotes.map(note => <NoteCard key={note.id} note={note} />)}
+                  {pinnedNotes.map(note => (
+                    <NoteCard 
+                      key={note.id} 
+                      note={note} 
+                      handleTogglePin={handleTogglePin}
+                      handleColorChange={handleColorChange}
+                      handleDelete={handleDelete}
+                    />
+                  ))}
                 </AnimatePresence>
               </div>
             </div>
@@ -257,7 +268,15 @@ export default function Notes() {
               {pinnedNotes.length > 0 && <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 pl-2">Others</h3>}
               <div className="columns-1 sm:columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
                 <AnimatePresence>
-                  {otherNotes.map(note => <NoteCard key={note.id} note={note} />)}
+                  {otherNotes.map(note => (
+                    <NoteCard 
+                      key={note.id} 
+                      note={note} 
+                      handleTogglePin={handleTogglePin}
+                      handleColorChange={handleColorChange}
+                      handleDelete={handleDelete}
+                    />
+                  ))}
                 </AnimatePresence>
               </div>
             </div>
