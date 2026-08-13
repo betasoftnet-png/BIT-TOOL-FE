@@ -100,18 +100,11 @@ export default function Navbar({ toggleMobileMenu }) {
   };
 
   const handleSignOut = () => {
-    const tokens = JSON.parse(localStorage.getItem('bnx_auth_tokens') || '[]');
-    tokens.splice(activeAccountIndex, 1); // Remove the active account
-    
-    if (tokens.length > 0) {
-      localStorage.setItem('bnx_auth_tokens', JSON.stringify(tokens));
-      localStorage.setItem('bnx_auth_token', tokens[0]); // Switch to another account
-      window.location.reload();
-    } else {
-      localStorage.removeItem('bnx_auth_tokens');
-      localStorage.removeItem('bnx_auth_token');
-      setAccounts([]);
-    }
+    localStorage.removeItem('bnx_auth_tokens');
+    localStorage.removeItem('bnx_auth_token');
+    localStorage.removeItem('bnx_active_token_index');
+    setAccounts([]);
+    window.location.reload();
   };
 
   const handleManageAccount = () => {
@@ -182,55 +175,58 @@ export default function Navbar({ toggleMobileMenu }) {
             )}
             
             {/* Dropdown Menu */}
-            <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col">
+            <div className="absolute top-full right-0 mt-2 w-[360px] bg-white border border-gray-100 rounded-[24px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col p-2">
               
               {/* Active Account Header */}
-              <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center p-6 text-center">
                   {activeUser.avatar ? (
                     <img 
                       src={activeUser.avatar} 
                       alt="Profile Avatar" 
-                      className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
+                      className="w-[72px] h-[72px] rounded-full object-cover border border-gray-200 shadow-sm mb-3"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg border border-blue-700 shadow-sm shrink-0">
+                    <div className="w-[72px] h-[72px] rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-bold text-3xl shadow-sm mb-3">
                       {activeUser.name ? activeUser.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">{activeUser.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{activeUser.email}</p>
-                  </div>
-                  <Check size={18} className="text-blue-600 shrink-0" />
-                </div>
+                  <p className="text-lg font-bold text-gray-900 mb-0.5">{activeUser.name}</p>
+                  <p className="text-sm text-gray-500 mb-6">{activeUser.email}</p>
+                  
+                  <button 
+                    onClick={handleManageAccount}
+                    className="px-6 py-2.5 border border-gray-200 rounded-full text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
+                  >
+                    Manage your Account
+                  </button>
               </div>
 
               {/* Inactive Account List */}
               {accounts.length > 1 && (
-                <div className="max-h-48 overflow-y-auto">
+                <div className="max-h-56 overflow-y-auto px-2 pb-2">
+                  <div className="h-px bg-gray-200 w-full mb-2"></div>
                   {accounts.map((acc, idx) => {
                     if (idx === activeAccountIndex) return null;
                     return (
                       <div 
                         key={idx}
                         onClick={() => handleSwitchAccount(idx)}
-                        className="p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-gray-100 hover:bg-gray-50"
+                        className="p-3 flex items-center gap-4 cursor-pointer transition-colors rounded-2xl hover:bg-gray-50 mb-1"
                       >
                         {acc.avatar ? (
                           <img 
                             src={acc.avatar} 
                             alt="Profile Avatar" 
-                            className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
+                            className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center font-bold text-xs border border-gray-600 shadow-sm shrink-0">
-                            {acc.name ? acc.name.charAt(0).toUpperCase() : 'U'}
+                          <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-800 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+                            {acc.name ? acc.name.charAt(0).toLowerCase() : 'u'}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{acc.name}</p>
-                          <p className="text-xs text-gray-500 truncate">{acc.email}</p>
+                          <p className="text-sm font-semibold text-gray-900 truncate">{acc.name}</p>
+                          <p className="text-[13px] text-gray-500 truncate">{acc.email}</p>
                         </div>
                       </div>
                     );
@@ -238,29 +234,30 @@ export default function Navbar({ toggleMobileMenu }) {
                 </div>
               )}
 
+              <div className="h-px bg-gray-200 w-full mb-1"></div>
+
               {/* Actions */}
-              <div className="p-2 space-y-1 bg-gray-50/30">
+              <div className="px-2 pt-1 pb-2">
                 <button 
                   onClick={handleSignIn}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg flex items-center gap-2 font-medium transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-gray-900 hover:bg-gray-50 rounded-2xl flex items-center gap-4 font-semibold transition-colors"
                 >
-                  <UserPlus size={16} />
+                  <UserPlus size={20} className="text-gray-600" />
                   Add another account
                 </button>
                 <button 
-                  onClick={handleManageAccount}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg flex items-center gap-2 font-medium transition-colors"
-                >
-                  <Settings size={16} />
-                  Manage account
-                </button>
-                <button 
                   onClick={handleSignOut}
-                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-100 rounded-lg flex items-center gap-2 font-medium transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-gray-900 hover:bg-gray-50 rounded-2xl flex items-center gap-4 font-semibold transition-colors"
                 >
-                  <LogOut size={16} />
-                  Sign out
+                  <LogOut size={20} className="text-gray-600" />
+                  Sign out of all accounts
                 </button>
+              </div>
+              
+              <div className="p-4 text-center text-xs text-gray-500 font-medium border-t border-gray-100 flex items-center justify-center gap-2 rounded-b-[24px]">
+                <a href="#" className="hover:text-gray-800">Privacy Policy</a>
+                <span>•</span>
+                <a href="#" className="hover:text-gray-800">Terms of Service</a>
               </div>
             </div>
           </div>
