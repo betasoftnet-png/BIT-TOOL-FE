@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Pin, Palette, Archive, Trash2, CheckSquare, Image as ImageIcon, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { noteService } from '../services/noteService';
+import BnxMailIcon from '../assets/bnx-mail.png';
 
 // Refined, premium translucent colors for glassmorphism
 const COLORS = [
@@ -41,7 +42,10 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
       <div className="flex justify-between items-start mb-3">
         <div className="flex flex-col gap-1 pr-8">
           {note.applicationName && (
-            <span className="text-[10px] font-bold tracking-wider text-gray-500 uppercase bg-gray-900/5 px-2 py-0.5 rounded-full self-start">
+            <span className="text-[10px] font-bold tracking-wider text-gray-500 uppercase bg-gray-900/5 px-2 py-0.5 rounded-full self-start flex items-center gap-1.5">
+              {note.applicationName.toLowerCase() === 'bnx mail' && (
+                <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain" />
+              )}
               {note.applicationName}
             </span>
           )}

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X, Plus, Clock, Fi
 import Holidays from 'date-holidays';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { calendarService } from '../services/calendarService';
+import BnxMailIcon from '../assets/bnx-mail.png';
 
 export default function Calendar() {
   const queryClient = useQueryClient();
@@ -346,7 +347,10 @@ export default function Calendar() {
       >
         {icon}
         {item.applicationName && item.applicationName !== 'Bit Tool' && (
-          <span className="bg-white/60 text-[9px] px-1 rounded-sm uppercase tracking-wider shadow-sm font-bold opacity-90 shrink-0">
+          <span className="bg-white/60 text-[9px] px-1 rounded-sm uppercase tracking-wider shadow-sm font-bold opacity-90 shrink-0 flex items-center gap-1">
+            {item.applicationName.toLowerCase() === 'bnx mail' && (
+              <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain inline-block" />
+            )}
             {item.applicationName.split(' ')[0]}
           </span>
         )}
@@ -425,7 +429,10 @@ export default function Calendar() {
                                 <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
                                   {ev.title}
                                   {ev.applicationName && ev.applicationName !== 'Bit Tool' && (
-                                    <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                    <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold flex items-center gap-1">
+                                      {ev.applicationName.toLowerCase() === 'bnx mail' && (
+                                        <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain inline-block" />
+                                      )}
                                       {ev.applicationName.split(' ')[0]}
                                     </span>
                                   )}
@@ -446,7 +453,10 @@ export default function Calendar() {
                                 <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
                                   {nt.title}
                                   {nt.applicationName && nt.applicationName !== 'Bit Tool' && (
-                                    <span className="bg-yellow-100 text-yellow-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                    <span className="bg-yellow-100 text-yellow-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold flex items-center gap-1">
+                                      {nt.applicationName.toLowerCase() === 'bnx mail' && (
+                                        <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain inline-block" />
+                                      )}
                                       {nt.applicationName.split(' ')[0]}
                                     </span>
                                   )}
@@ -467,7 +477,10 @@ export default function Calendar() {
                                 <div className="text-sm font-medium text-gray-800 truncate flex items-center gap-2">
                                   {rm.title}
                                   {rm.applicationName && rm.applicationName !== 'Bit Tool' && (
-                                    <span className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold">
+                                    <span className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold flex items-center gap-1">
+                                      {rm.applicationName.toLowerCase() === 'bnx mail' && (
+                                        <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain inline-block" />
+                                      )}
                                       {rm.applicationName.split(' ')[0]}
                                     </span>
                                   )}

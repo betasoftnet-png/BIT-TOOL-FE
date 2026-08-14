@@ -3,8 +3,10 @@ import { History, X, ChevronRight, ArrowLeft } from 'lucide-react';
 import BitToolLogo from '../assets/BIT-TOOL-2.png';
 import CliksBusinessLogo from '../assets/cliks-business.png';
 import CliksLogo from '../assets/cliks.png';
+import BnxMailIcon from '../assets/bnx-mail.png';
 
 const getAppLogo = (appName) => {
+  if (appName?.toLowerCase() === 'bnx mail') return BnxMailIcon;
   if (appName === 'Bit Tool') return BitToolLogo;
   if (appName === 'Cliks Business') return CliksBusinessLogo;
   if (appName === 'Cliks') return CliksLogo;
