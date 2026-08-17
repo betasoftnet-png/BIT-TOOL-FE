@@ -129,8 +129,8 @@ export default function Navbar({ toggleMobileMenu }) {
     <header className="h-16 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-10 sticky top-0 shadow-sm transition-colors" style={{backgroundColor:"rgba(17, 87, 218, 0.66)"}}>
       <div className="flex items-center gap-6 md:gap-20 lg:gap-25">
         <div className="flex items-center gap-2">
-          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-8 object-contain" />
-          <span className="font-bold text-lg tracking-tight text-gray-800 dark:text-white">BitTool</span>
+          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-9 object-contain bg-white" style={{borderRadius:'5px'}} />
+          <span className="font-bold text-lg tracking-tight text-gray-800 dark:text-white">Bit-tool</span>
         </div>
 
         <button 
