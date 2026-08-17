@@ -129,24 +129,24 @@ export default function Contacts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
+          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 transition-colors">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl transition-colors">
               <Users size={24} />
             </div>
             Contact Management
           </h1>
-          <p className="text-gray-500 mt-2 text-sm">Manage your contacts across all integrated applications.</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm transition-colors">Manage your contacts across all integrated applications.</p>
         </div>
         
         <div className="flex items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
             <input
               type="text"
               placeholder="Search contacts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm font-medium bg-white dark:bg-gray-800 dark:text-white"
             />
           </div>
           
@@ -161,7 +161,7 @@ export default function Contacts() {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-[24px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex-1 overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-[24px] border border-gray-100 dark:border-gray-700 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex-1 overflow-hidden flex flex-col transition-colors">
         
         {/* Contacts List */}
         <div className="flex-1 overflow-y-auto">
@@ -177,11 +177,11 @@ export default function Contacts() {
               <button onClick={fetchContacts} className="mt-4 text-blue-600 font-medium hover:underline">Try Again</button>
             </div>
           ) : contacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <div className="bg-gray-50 p-6 rounded-full mb-4">
-                <Users size={48} className="text-gray-300" />
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-full mb-4">
+                <Users size={48} className="text-gray-300 dark:text-gray-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">No Contacts Yet</h3>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">No Contacts Yet</h3>
               <p className="text-sm">Get started by creating your first contact.</p>
               <button 
                 onClick={openAddModal}
@@ -192,15 +192,15 @@ export default function Contacts() {
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50/80 sticky top-0 z-10 backdrop-blur-sm">
+              <thead className="bg-gray-50/80 dark:bg-gray-900/80 sticky top-0 z-10 backdrop-blur-sm transition-colors">
                 <tr>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Name</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Contact Info</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Role</th>
-                  <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100 text-right">Actions</th>
+                  <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Name</th>
+                  <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Contact Info</th>
+                  <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">Role</th>
+                  <th className="py-4 px-6 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700 transition-colors">
                 {filteredContacts.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="py-8 text-center text-gray-500">
@@ -209,37 +209,37 @@ export default function Contacts() {
                   </tr>
                 ) : (
                   filteredContacts.map((contact) => (
-                    <tr key={contact.id} className="hover:bg-gray-50/50 transition-colors group">
+                    <tr key={contact.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors group">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-700 font-bold text-lg border border-blue-100 flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-900/20 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-lg border border-blue-100 dark:border-blue-900/50 flex-shrink-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-800">{contact.name}</p>
+                          <p className="font-bold text-gray-800 dark:text-gray-100">{contact.name}</p>
                           <div className="flex items-center gap-1.5 mt-1">
                              <img src={getAppLogo(contact.applicationName)} alt={contact.applicationName} title={contact.applicationName} className="w-3.5 h-3.5 rounded-sm object-contain" />
-                             <p className="text-[10px] text-gray-500 font-bold tracking-wide">{contact.applicationName}</p>
-                             <span className="text-gray-300 mx-0.5">•</span>
-                             <p className="text-[10px] text-gray-400 font-medium">Added {new Date(contact.createdAt).toLocaleDateString()}</p>
+                             <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-wide">{contact.applicationName}</p>
+                             <span className="text-gray-300 dark:text-gray-600 mx-0.5">•</span>
+                             <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Added {new Date(contact.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Mail size={14} className="text-gray-400" />
-                          {contact.email || <span className="text-gray-300 italic">No email</span>}
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                          <Mail size={14} className="text-gray-400 dark:text-gray-500" />
+                          {contact.email || <span className="text-gray-300 dark:text-gray-600 italic">No email</span>}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Phone size={14} className="text-gray-400" />
-                          {contact.phonenumber || <span className="text-gray-300 italic">No phone</span>}
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                          <Phone size={14} className="text-gray-400 dark:text-gray-500" />
+                          {contact.phonenumber || <span className="text-gray-300 dark:text-gray-600 italic">No phone</span>}
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-600 capitalize">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 capitalize">
                         <Briefcase size={12} />
                         {contact.role || 'Contact'}
                       </div>
@@ -248,13 +248,13 @@ export default function Contacts() {
                       <div className="flex items-center justify-end gap-2 transition-opacity">
                         <button 
                           onClick={() => openEditModal(contact)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => openDeleteModal(contact)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>

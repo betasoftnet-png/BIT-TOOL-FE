@@ -464,21 +464,21 @@ export default function Weather() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-indigo-50 to-blue-100 p-4 md:p-8 rounded-3xl">
+    <div className="min-h-full bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8 rounded-3xl transition-colors">
       <div className="max-w-5xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-              <div className="p-3 bg-blue-500 text-white rounded-2xl shadow-lg shadow-blue-500/30">
+            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3 transition-colors">
+              <div className="p-3 bg-blue-500 dark:bg-blue-900/40 text-white dark:text-blue-400 rounded-2xl shadow-lg shadow-blue-500/30 dark:shadow-none transition-colors">
                 <CloudRain size={28} />
               </div>
 
               Weather Forecast
             </h1>
 
-            <p className="text-gray-500 mt-2 text-sm md:text-base font-medium flex items-center gap-1.5">
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm md:text-base font-medium flex items-center gap-1.5 transition-colors">
               <MapPin size={16} className="text-blue-500" />
 
               {coords
@@ -499,18 +499,18 @@ export default function Weather() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center p-12 bg-white/60 backdrop-blur-md rounded-3xl border border-white shadow-xl"
+            className="flex flex-col items-center justify-center p-12 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-3xl border border-white dark:border-gray-700 shadow-xl transition-colors"
           >
             <Loader2
               size={40}
               className="animate-spin text-blue-500 mb-4"
             />
 
-            <h3 className="text-lg font-bold text-gray-800">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 transition-colors">
               Determining your location...
             </h3>
 
-            <p className="text-gray-500 text-sm mt-1 text-center">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 text-center transition-colors">
               Please allow location access in your browser.
             </p>
           </motion.div>
@@ -521,13 +521,13 @@ export default function Weather() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-red-50 border-l-4 border-red-500 rounded-r-2xl shadow-sm"
+            className="p-6 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-800 rounded-r-2xl shadow-sm transition-colors"
           >
-            <h3 className="text-lg font-bold text-red-800">
+            <h3 className="text-lg font-bold text-red-800 dark:text-red-400 transition-colors">
               Location Error
             </h3>
 
-            <p className="text-red-600 mt-1">
+            <p className="text-red-600 dark:text-red-300 mt-1 transition-colors">
               {geoError}
             </p>
 
@@ -562,12 +562,12 @@ export default function Weather() {
 
         {/* Weather API Error */}
         {error && (
-          <div className="p-6 bg-red-50 border-l-4 border-red-500 rounded-r-2xl shadow-sm">
-            <h3 className="text-lg font-bold text-red-800">
+          <div className="p-6 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-800 rounded-r-2xl shadow-sm transition-colors">
+            <h3 className="text-lg font-bold text-red-800 dark:text-red-400 transition-colors">
               Failed to fetch weather data
             </h3>
 
-            <p className="text-red-600 mt-1">
+            <p className="text-red-600 dark:text-red-300 mt-1 transition-colors">
               {error.message}
             </p>
           </div>
@@ -655,9 +655,9 @@ export default function Weather() {
             </div>
 
             {/* Today's Summary */}
-            <div className="col-span-1 bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-xl flex flex-col gap-6">
+            <div className="col-span-1 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 border border-white dark:border-gray-700 shadow-xl flex flex-col gap-6 transition-colors">
 
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 transition-colors">
                 <Thermometer
                   size={20}
                   className="text-orange-500"
@@ -668,7 +668,7 @@ export default function Weather() {
 
               <div className="grid grid-cols-2 gap-4 flex-1">
 
-                <div className="bg-orange-50 rounded-2xl p-4 flex flex-col justify-center items-center text-center gap-2 border border-orange-100">
+                <div className="bg-orange-50 dark:bg-orange-900/30 rounded-2xl p-4 flex flex-col justify-center items-center text-center gap-2 border border-orange-100 dark:border-orange-800/50 transition-colors">
 
                   <Sunrise
                     size={28}
@@ -676,11 +676,11 @@ export default function Weather() {
                   />
 
                   <div>
-                    <p className="text-xs text-orange-600/80 font-bold uppercase tracking-wider">
+                    <p className="text-xs text-orange-600/80 dark:text-orange-400/80 font-bold uppercase tracking-wider transition-colors">
                       Sunrise
                     </p>
 
-                    <p className="text-lg font-black text-orange-900">
+                    <p className="text-lg font-black text-orange-900 dark:text-orange-400 transition-colors">
                       {formatTime(
                         data.daily.sunrise[0]
                       )}
@@ -688,7 +688,7 @@ export default function Weather() {
                   </div>
                 </div>
 
-                <div className="bg-indigo-50 rounded-2xl p-4 flex flex-col justify-center items-center text-center gap-2 border border-indigo-100">
+                <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl p-4 flex flex-col justify-center items-center text-center gap-2 border border-indigo-100 dark:border-indigo-800/50 transition-colors">
 
                   <Sunset
                     size={28}
@@ -696,11 +696,11 @@ export default function Weather() {
                   />
 
                   <div>
-                    <p className="text-xs text-indigo-600/80 font-bold uppercase tracking-wider">
+                    <p className="text-xs text-indigo-600/80 dark:text-indigo-400/80 font-bold uppercase tracking-wider transition-colors">
                       Sunset
                     </p>
 
-                    <p className="text-lg font-black text-indigo-900">
+                    <p className="text-lg font-black text-indigo-900 dark:text-indigo-400 transition-colors">
                       {formatTime(
                         data.daily.sunset[0]
                       )}
@@ -709,10 +709,10 @@ export default function Weather() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between bg-white dark:bg-gray-900/50 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors">
 
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1 transition-colors">
                     Min
                   </p>
 
@@ -724,10 +724,10 @@ export default function Weather() {
                   </p>
                 </div>
 
-                <div className="w-px h-8 bg-gray-200"></div>
+                <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 transition-colors"></div>
 
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1 transition-colors">
                     Max
                   </p>
 
@@ -743,7 +743,7 @@ export default function Weather() {
             </div>
 
             {/* Hourly Forecast */}
-            <div className="col-span-1 lg:col-span-3 bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-xl">
+            <div className="col-span-1 lg:col-span-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 border border-white dark:border-gray-700 shadow-xl transition-colors">
 
               <div className="flex items-center gap-2 mb-6">
                 <Clock
@@ -751,7 +751,7 @@ export default function Weather() {
                   className="text-blue-500"
                 />
 
-                <h3 className="text-lg font-bold text-gray-800">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-white transition-colors">
                   Hourly Forecast
                 </h3>
               </div>
@@ -787,15 +787,15 @@ export default function Weather() {
                         className={`flex flex-col items-center justify-between min-w-[80px] p-4 rounded-2xl shrink-0 transition-colors shadow-sm border ${
                           isNow
                             ? 'bg-blue-500 text-white border-blue-600 shadow-blue-500/30'
-                            : 'bg-white border-gray-100 hover:border-blue-200'
+                            : 'bg-white dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-gray-700'
                         }`}
                       >
 
                         <p
-                          className={`text-sm font-bold ${
+                          className={`text-sm font-bold transition-colors ${
                             isNow
                               ? 'text-white'
-                              : 'text-gray-500'
+                              : 'text-gray-500 dark:text-gray-400'
                           }`}
                         >
                           {isNow
@@ -814,10 +814,10 @@ export default function Weather() {
                         </div>
 
                         <p
-                          className={`text-xl font-black ${
+                          className={`text-xl font-black transition-colors ${
                             isNow
                               ? 'text-white'
-                              : 'text-gray-900'
+                              : 'text-gray-900 dark:text-gray-100'
                           }`}
                         >
                           {temp}°
@@ -830,7 +830,7 @@ export default function Weather() {
             </div>
 
             {/* 7-Day Forecast */}
-            <div className="col-span-1 lg:col-span-3 bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white shadow-xl">
+            <div className="col-span-1 lg:col-span-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 border border-white dark:border-gray-700 shadow-xl transition-colors">
 
               <div className="flex items-center gap-2 mb-6">
                 <Calendar
@@ -838,7 +838,7 @@ export default function Weather() {
                   className="text-blue-500"
                 />
 
-                <h3 className="text-lg font-bold text-gray-800">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-white transition-colors">
                   7-Day Forecast
                 </h3>
               </div>
@@ -864,10 +864,10 @@ export default function Weather() {
                         whileHover={{
                           scale: 1.02,
                         }}
-                        className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-between items-center gap-3"
+                        className="bg-white dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col justify-between items-center gap-3 transition-colors"
                       >
 
-                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+                        <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors">
                           {formatDay(time)}
                         </p>
 

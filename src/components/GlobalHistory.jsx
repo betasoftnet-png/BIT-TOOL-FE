@@ -73,10 +73,10 @@ export default function GlobalHistory({ onClose }) {
     if (history.length === 0) {
       return (
         <div className="text-center text-gray-400 text-sm mt-12 flex flex-col items-center">
-          <div className="bg-gray-100 p-4 rounded-full mb-3">
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full mb-3 transition-colors">
              <History size={24} className="opacity-50" />
           </div>
-          <p className="font-semibold text-gray-500">No cross-app history</p>
+          <p className="font-semibold text-gray-500 dark:text-gray-300">No cross-app history</p>
           <p className="text-xs mt-1">Calculations from all apps will appear here</p>
         </div>
       );
@@ -95,7 +95,7 @@ export default function GlobalHistory({ onClose }) {
             <div className="text-center text-gray-400 text-xs py-4">No items in this tape</div>
           ) : (
             items.map((item, index) => (
-              <div key={item.id || index} className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col">
+              <div key={item.id || index} className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col transition-colors">
                 <div className="flex justify-between items-center mb-1">
                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
                      {item.label || `Step ${item.sequence}`}
@@ -105,8 +105,8 @@ export default function GlobalHistory({ onClose }) {
                    </span>
                 </div>
                 <div className="flex justify-between items-end mt-1">
-                   <span className="text-sm font-bold text-gray-500">{item.operator || ''} {parseFloat(item.value).toLocaleString('en-IN', {maximumFractionDigits: 4})}</span>
-                   <span className="text-sm font-black text-gray-800">₹{parseFloat(item.runningTotal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                   <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{item.operator || ''} {parseFloat(item.value).toLocaleString('en-IN', {maximumFractionDigits: 4})}</span>
+                   <span className="text-sm font-black text-gray-800 dark:text-gray-100">₹{parseFloat(item.runningTotal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 </div>
               </div>
             ))
@@ -133,23 +133,23 @@ export default function GlobalHistory({ onClose }) {
               <div 
                 key={session.id} 
                 onClick={() => setSelectedSession(session)}
-                className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all cursor-pointer group flex justify-between items-center"
+                className="bg-white dark:bg-gray-800 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-100 dark:hover:border-blue-500/50 transition-all cursor-pointer group flex justify-between items-center"
               >
                 <div>
-                  <div className="text-xs font-bold text-gray-800 mb-1 group-hover:text-blue-600 transition-colors">
+                  <div className="text-xs font-bold text-gray-800 dark:text-gray-100 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {session.title || 'Tape'}
                   </div>
-                  <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5">
+                  <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium flex items-center gap-1.5">
                     <span>{new Date(session.createdAt).toLocaleDateString()} {new Date(session.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     <span>•</span>
                     <span>{itemsCount} items</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-sm font-black text-gray-800">
+                  <div className="text-sm font-black text-gray-800 dark:text-gray-100">
                     ₹{parseFloat(finalTotal).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </div>
-                  <ChevronRight size={16} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                  <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-500 transition-colors" />
                 </div>
               </div>
             );
@@ -168,16 +168,16 @@ export default function GlobalHistory({ onClose }) {
             <div 
               key={appName} 
               onClick={() => setSelectedApp(appName)}
-              className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all cursor-pointer group flex items-center justify-between"
+              className="bg-white dark:bg-gray-800 p-3.5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-100 dark:hover:border-blue-500/50 transition-all cursor-pointer group flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
-                <img src={getAppLogo(appName)} alt={appName} className="w-8 h-8 rounded-lg object-contain border border-gray-50 shadow-sm" />
+                <img src={getAppLogo(appName)} alt={appName} className="w-8 h-8 rounded-lg object-contain border border-gray-50 dark:border-gray-700 shadow-sm" />
                 <div>
-                  <div className="text-sm font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{appName}</div>
-                  <div className="text-[10px] text-gray-400 font-medium">{appHistoryCount} {appHistoryCount === 1 ? 'Tape' : 'Tapes'} saved</div>
+                  <div className="text-sm font-bold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{appName}</div>
+                  <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{appHistoryCount} {appHistoryCount === 1 ? 'Tape' : 'Tapes'} saved</div>
                 </div>
               </div>
-              <ChevronRight size={18} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+              <ChevronRight size={18} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-500 transition-colors" />
             </div>
           );
         })}
@@ -186,18 +186,18 @@ export default function GlobalHistory({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/90 backdrop-blur-xl border border-gray-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] rounded-[24px] overflow-hidden w-80 flex-shrink-0 transition-all duration-300">
-      <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white min-h-[60px]">
-        <div className="flex items-center gap-3 text-gray-800 font-extrabold flex-1">
+    <div className="flex flex-col h-full bg-white/90 dark:bg-gray-800 backdrop-blur-xl border border-gray-200 dark:border-gray-700 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none rounded-[24px] overflow-hidden w-full xl:w-80 flex-shrink-0 transition-all duration-300">
+      <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 min-h-[60px]">
+        <div className="flex items-center gap-3 text-gray-800 dark:text-white font-extrabold flex-1">
           {selectedApp || selectedSession ? (
             <button 
               onClick={handleBack} 
-              className="p-1.5 bg-white border border-gray-200 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors shadow-sm flex items-center gap-1"
+              className="p-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg text-gray-600 dark:text-gray-300 transition-colors shadow-sm flex items-center gap-1"
             >
               <ArrowLeft size={16} />
             </button>
           ) : (
-            <div className="bg-blue-100 p-2 rounded-xl text-blue-600">
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-xl text-blue-600 dark:text-blue-400">
                <History size={18} />
             </div>
           )}
@@ -206,13 +206,13 @@ export default function GlobalHistory({ onClose }) {
           </span>
         </div>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 hover:bg-red-50 hover:text-red-500 rounded-full text-gray-400 transition-colors">
+          <button onClick={onClose} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 rounded-full text-gray-400 transition-colors">
             <X size={18} />
           </button>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-gray-50/50 dark:bg-gray-900/50 transition-colors">
         {renderContent()}
       </div>
     </div>

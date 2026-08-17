@@ -698,7 +698,7 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                     </div>
 
                     {/* 2-Column Layout Wrapper */}
-                    <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minHeight: 0 }}>
+                    <div className="flex flex-col lg:flex-row flex-1 min-h-0">
                         
                         {/* LEFT COLUMN: Middle Scrollable Section (Tape Area & History) */}
                         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRight: '1px solid #E2E8F0', background: '#FAFAFB' }} className="custom-scrollbar">
@@ -706,10 +706,10 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                     {showHistory ? (
                         <div style={{
                             flex: 1,
-                            maxHeight: '180px',
+                            maxHeight: isInline ? 'none' : '180px',
                             minHeight: '100px',
                             overflowY: 'auto',
-                            padding: '12px',
+                            padding: isInline ? '24px' : '12px',
                             backgroundColor: '#F8FAFC',
                             borderBottom: '1px solid #E2E8F0',
                             display: 'flex',
@@ -931,7 +931,7 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                         </div>
                         
                         {/* RIGHT COLUMN: Controls (SmartBar, Keypad, Total) */}
-                        <div style={{ width: '380px', display: 'flex', flexDirection: 'column', background: '#FFFFFF', flexShrink: 0, borderLeft: '1px solid #E2E8F0' }}>
+                        <div className="w-full lg:w-[380px] flex flex-col bg-white shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200">
                             <div style={styles.smartBar}>
                             <button 
                                 onClick={() => setShowSmartOptions(showSmartOptions === 'gst' ? null : 'gst')}
@@ -1328,10 +1328,10 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                         {showHistory ? (
                             <div style={{
                                 flex: 1,
-                                maxHeight: '180px',
+                                maxHeight: isInline ? 'none' : '180px',
                                 minHeight: '100px',
                                 overflowY: 'auto',
-                                padding: '12px',
+                                padding: isInline ? '24px' : '12px',
                                 backgroundColor: '#F8FAFC',
                                 borderBottom: '1px solid #E2E8F0',
                                 display: 'flex',

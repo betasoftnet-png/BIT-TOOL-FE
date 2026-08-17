@@ -30,44 +30,44 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.2 }}
-      className="group relative flex flex-col rounded-3xl border border-white/60 p-5 shadow-lg hover:shadow-2xl transition-all cursor-pointer backdrop-blur-xl bg-white/70 h-full"
+      className="group relative flex flex-col rounded-3xl border border-white/60 dark:border-gray-700 p-5 shadow-lg hover:shadow-2xl transition-all cursor-pointer backdrop-blur-xl bg-white/70 dark:bg-gray-800/70 h-full"
       style={{ 
-        backgroundColor: note.color === '#ffffff' ? 'rgba(255,255,255,0.7)' : note.color,
+        backgroundColor: note.color === '#ffffff' ? undefined : note.color,
       }}
       onClick={() => onClick(note)}
     >
       {/* Decorative top gradient edge */}
-      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-white/40 to-transparent"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl bg-gradient-to-r from-white/40 dark:from-white/10 to-transparent"></div>
 
       <div className="flex justify-between items-start mb-3">
         <div className="flex flex-col gap-1 pr-8">
           {note.applicationName && (
-            <span className="text-[10px] font-bold tracking-wider text-gray-500 uppercase bg-gray-900/5 px-2 py-0.5 rounded-full self-start flex items-center gap-1.5">
+            <span className="text-[10px] font-bold tracking-wider text-gray-500 dark:text-gray-400 uppercase bg-gray-900/5 dark:bg-white/10 px-2 py-0.5 rounded-full self-start flex items-center gap-1.5">
               {note.applicationName.toLowerCase() === 'bnx mail' && (
                 <img src={BnxMailIcon} alt="BNX Mail" className="w-3 h-3 object-contain" />
               )}
               {note.applicationName}
             </span>
           )}
-          {note.title && <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-2">{note.title}</h3>}
+          {note.title && <h3 className="font-semibold text-gray-900 dark:text-white text-lg leading-tight line-clamp-2">{note.title}</h3>}
           {!note.title && !note.applicationName && <div className="h-2"></div>}
         </div>
         
         <button 
           onClick={(e) => { e.stopPropagation(); handleTogglePin(e, note); }}
-          className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 ${note.isPinned ? 'bg-gray-900/10 text-gray-900 backdrop-blur-md' : 'text-gray-400 hover:bg-gray-900/10 hover:text-gray-800'}`}
+          className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 ${note.isPinned ? 'bg-gray-900/10 dark:bg-white/20 text-gray-900 dark:text-white backdrop-blur-md' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-800 dark:hover:text-white'}`}
         >
           {note.isPinned ? <Pin size={18} className="fill-current" /> : <Pin size={18} />}
         </button>
       </div>
 
-      {note.content && <p className="text-gray-700 whitespace-pre-wrap text-[15px] leading-relaxed line-clamp-6 flex-1">{note.content}</p>}
+      {note.content && <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-[15px] leading-relaxed line-clamp-6 flex-1">{note.content}</p>}
 
       {/* Note Footer Actions */}
-      <div className="mt-6 pt-3 flex items-center justify-between border-t border-gray-900/5 relative" onClick={e => e.stopPropagation()}>
+      <div className="mt-6 pt-3 flex items-center justify-between border-t border-gray-900/5 dark:border-white/10 relative" onClick={e => e.stopPropagation()}>
         <div className="flex items-center gap-1">
           <button 
-            className="p-2 rounded-full text-gray-500 hover:bg-gray-900/10 hover:text-gray-900 transition-colors relative"
+            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors relative"
             onMouseEnter={() => setShowPalette(true)}
             onMouseLeave={() => setShowPalette(false)}
           >
@@ -78,28 +78,28 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute bottom-full left-0 mb-3 w-[200px] bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 z-50 cursor-default"
+                  className="absolute bottom-full left-0 mb-3 w-[200px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white dark:border-gray-700 p-3 grid grid-cols-5 gap-2 z-50 cursor-default"
                 >
                   {COLORS.map(c => (
                     <div 
                       key={c}
                       onClick={(e) => { e.stopPropagation(); handleColorChange(e, note.id, c); setShowPalette(false); }}
-                      className="w-8 h-8 rounded-full border-2 border-white/50 cursor-pointer hover:scale-110 transition-transform shadow-sm"
-                      style={{ backgroundColor: c === '#ffffff' ? '#f8f9fa' : c }}
+                      className="w-8 h-8 rounded-full border-2 border-white/50 dark:border-gray-600 cursor-pointer hover:scale-110 transition-transform shadow-sm"
+                      style={{ backgroundColor: c === '#ffffff' ? 'transparent' : c }}
                     />
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </button>
-          <button className="p-2 rounded-full text-gray-500 hover:bg-gray-900/10 hover:text-gray-900 transition-colors" title="Archive">
+          <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors" title="Archive">
             <Archive size={16} />
           </button>
         </div>
         
         <button 
           onClick={(e) => { e.stopPropagation(); handleDelete(e, note.id); }}
-          className="p-2 rounded-full text-gray-400 hover:bg-red-500/10 hover:text-red-600 transition-colors" title="Delete"
+          className="p-2 rounded-full text-gray-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors" title="Delete"
         >
           <Trash2 size={16} />
         </button>
@@ -225,8 +225,8 @@ export default function Notes() {
         <div className="max-w-2xl mx-auto mb-16 relative z-10">
           <motion.div 
             ref={takeNoteRef}
-            className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgb(0,0,0,0.08)] border border-white/60 transition-all duration-300"
-            style={{ backgroundColor: newNote.color === '#ffffff' ? 'rgba(255,255,255,0.8)' : newNote.color }}
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_rgb(0,0,0,0.08)] dark:shadow-none border border-white/60 dark:border-gray-700 transition-all duration-300"
+            style={{ backgroundColor: newNote.color === '#ffffff' ? undefined : newNote.color }}
             animate={{ minHeight: isTakingNote ? 160 : 64 }}
           >
             {isTakingNote ? (
@@ -237,11 +237,11 @@ export default function Notes() {
                     placeholder="Note Title" 
                     value={newNote.title}
                     onChange={e => setNewNote({...newNote, title: e.target.value})}
-                    className="w-full text-xl font-bold bg-transparent outline-none placeholder-gray-400 text-gray-900"
+                    className="w-full text-xl font-bold bg-transparent outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white"
                   />
                   <button 
                     onClick={(e) => handleTogglePin(e, 'new')}
-                    className={`p-2 rounded-full hover:bg-gray-900/10 transition-colors ${newNote.isPinned ? 'text-gray-900 bg-gray-900/5' : 'text-gray-400'}`}
+                    className={`p-2 rounded-full hover:bg-gray-900/10 dark:hover:bg-white/10 transition-colors ${newNote.isPinned ? 'text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10' : 'text-gray-400 dark:text-gray-500'}`}
                   >
                     {newNote.isPinned ? <Pin size={22} className="fill-current" /> : <Pin size={22} />}
                   </button>
@@ -251,21 +251,21 @@ export default function Notes() {
                   placeholder="What's on your mind?" 
                   value={newNote.content}
                   onChange={e => setNewNote({...newNote, content: e.target.value})}
-                  className="w-full resize-none bg-transparent outline-none text-gray-700 text-[16px] min-h-[80px] leading-relaxed flex-1"
+                  className="w-full resize-none bg-transparent outline-none text-gray-700 dark:text-gray-300 text-[16px] min-h-[80px] leading-relaxed flex-1"
                   autoFocus
                 />
 
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-900/5">
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-900/5 dark:border-white/10">
                   <div className="flex items-center gap-2">
-                    <button className="p-2.5 rounded-full text-gray-500 hover:bg-gray-900/10 hover:text-gray-900 transition-colors group relative">
+                    <button className="p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors group relative">
                       <Palette size={20} />
-                      <div className="absolute top-full left-0 mt-3 w-[200px] bg-white/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white p-3 grid grid-cols-5 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 transition-all cursor-default">
+                      <div className="absolute top-full left-0 mt-3 w-[200px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white dark:border-gray-700 p-3 grid grid-cols-5 gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50 transition-all cursor-default">
                         {COLORS.map(c => (
                           <div 
                             key={c}
                             onClick={(e) => { e.stopPropagation(); handleColorChange(e, 'new', c); }}
-                            className="w-8 h-8 rounded-full border-2 border-white/50 cursor-pointer hover:scale-110 transition-transform shadow-sm"
-                            style={{ backgroundColor: c === '#ffffff' ? '#f8f9fa' : c }}
+                            className="w-8 h-8 rounded-full border-2 border-white/50 dark:border-gray-600 cursor-pointer hover:scale-110 transition-transform shadow-sm"
+                            style={{ backgroundColor: c === '#ffffff' ? 'transparent' : c }}
                           />
                         ))}
                       </div>
@@ -275,13 +275,13 @@ export default function Notes() {
                   <div className="flex items-center gap-3">
                     <button 
                       onClick={() => setIsTakingNote(false)}
-                      className="px-5 py-2.5 font-semibold text-sm rounded-xl hover:bg-gray-900/5 text-gray-600 transition-colors"
+                      className="px-5 py-2.5 font-semibold text-sm rounded-xl hover:bg-gray-900/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition-colors"
                     >
                       Cancel
                     </button>
                     <button 
                       onClick={handleSaveNote}
-                      className="px-6 py-2.5 font-semibold text-sm rounded-xl bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/20 transition-all active:scale-95"
+                      className="px-6 py-2.5 font-semibold text-sm rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 shadow-lg shadow-gray-900/20 transition-all active:scale-95"
                     >
                       Save Note
                     </button>
@@ -294,12 +294,12 @@ export default function Notes() {
                 onClick={() => setIsTakingNote(true)}
               >
                 <div className="flex items-center gap-3">
-                  <Plus size={22} className="text-gray-400 group-hover:text-gray-600 transition-colors" />
-                  <span className="text-gray-500 font-medium text-[16px] group-hover:text-gray-700 transition-colors">Create a new note...</span>
+                  <Plus size={22} className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                  <span className="text-gray-500 dark:text-gray-400 font-medium text-[16px] group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">Create a new note...</span>
                 </div>
                 <div className="flex gap-1">
-                  <button className="p-2 text-gray-400 hover:bg-gray-900/5 hover:text-gray-700 rounded-full transition-colors"><CheckSquare size={20} /></button>
-                  <button className="p-2 text-gray-400 hover:bg-gray-900/5 hover:text-gray-700 rounded-full transition-colors"><ImageIcon size={20} /></button>
+                  <button className="p-2 text-gray-400 hover:bg-gray-900/5 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-300 rounded-full transition-colors"><CheckSquare size={20} /></button>
+                  <button className="p-2 text-gray-400 hover:bg-gray-900/5 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-300 rounded-full transition-colors"><ImageIcon size={20} /></button>
                 </div>
               </div>
             )}
@@ -321,8 +321,8 @@ export default function Notes() {
                     onClick={() => setSelectedApp(app)}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       selectedApp === app 
-                        ? 'bg-gray-900 text-white shadow-md' 
-                        : 'bg-white/50 text-gray-600 hover:bg-white/80 border border-white/60'
+                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md' 
+                        : 'bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 border border-white/60 dark:border-gray-700'
                     }`}
                   >
                     {app === 'All' ? 'All Apps' : app}
@@ -388,7 +388,7 @@ export default function Notes() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm"
+                className="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/60 backdrop-blur-sm"
               />
               <motion.div 
                 ref={editModalRef}
@@ -396,10 +396,10 @@ export default function Notes() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="bg-white/90 backdrop-blur-2xl rounded-[32px] shadow-[0_20px_60px_rgb(0,0,0,0.15)] border border-white/60 overflow-hidden w-full max-w-3xl flex flex-col relative z-10"
-                style={{ backgroundColor: editingNote.color === '#ffffff' ? 'rgba(255,255,255,0.9)' : editingNote.color }}
+                className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl rounded-[32px] shadow-[0_20px_60px_rgb(0,0,0,0.15)] border border-white/60 dark:border-gray-700 overflow-hidden w-full max-w-3xl flex flex-col relative z-10"
+                style={{ backgroundColor: editingNote.color === '#ffffff' ? undefined : editingNote.color }}
               >
-                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-white/40 to-transparent"></div>
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-white/40 dark:from-white/10 to-transparent"></div>
                 
                 <div className="p-8 flex flex-col h-full max-h-[85vh]">
                   <input 
@@ -407,20 +407,20 @@ export default function Notes() {
                     placeholder="Note Title" 
                     value={editingNote.title || ''}
                     onChange={e => setEditingNote({...editingNote, title: e.target.value})}
-                    className="w-full text-3xl font-bold bg-transparent outline-none placeholder-gray-400 text-gray-900 mb-6"
+                    className="w-full text-3xl font-bold bg-transparent outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white mb-6"
                   />
                   
                   <textarea 
                     placeholder="Start typing..." 
                     value={editingNote.content || ''}
                     onChange={e => setEditingNote({...editingNote, content: e.target.value})}
-                    className="w-full resize-none bg-transparent outline-none text-gray-700 text-lg min-h-[400px] flex-1 overflow-y-auto leading-relaxed"
+                    className="w-full resize-none bg-transparent outline-none text-gray-700 dark:text-gray-300 text-lg min-h-[400px] flex-1 overflow-y-auto leading-relaxed"
                   />
 
-                  <div className="flex justify-end mt-8 pt-6 border-t border-gray-900/10">
+                  <div className="flex justify-end mt-8 pt-6 border-t border-gray-900/10 dark:border-white/10">
                     <button 
                       onClick={handleSaveEdit}
-                      className="px-8 py-3 font-semibold text-[15px] rounded-xl bg-gray-900 text-white hover:bg-gray-800 shadow-xl shadow-gray-900/20 transition-all active:scale-95"
+                      className="px-8 py-3 font-semibold text-[15px] rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 shadow-xl shadow-gray-900/20 transition-all active:scale-95"
                     >
                       Done
                     </button>

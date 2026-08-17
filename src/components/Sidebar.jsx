@@ -12,7 +12,8 @@ import {
   Newspaper, 
   Keyboard as KeyboardIcon, 
   Settings as SettingsIcon,
-  X
+  X,
+  HelpCircle
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -28,7 +29,6 @@ const menuItems = [
   { path: '/weather', name: 'Weather', icon: CloudRain },
   // { path: '/news', name: 'News Feed', icon: Newspaper },
   { path: '/keyboard', name: 'Keyboard', icon: KeyboardIcon },
-  { path: '/settings', name: 'Settings', icon: SettingsIcon },
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -36,22 +36,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     <aside 
       className={twMerge(
         clsx(
-          "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-100 shadow-sm transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col",
+          "fixed top-16 bottom-0 left-0 z-30 w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-400 shadow-sm transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col transition-colors",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )
       )}
     >
-      <div className="h-16 flex items-center justify-between px-6 border-b border-gray-50">
-        <div className="flex items-center">
-          <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-8 object-contain" />
-        </div>
-        <button 
-          className="lg:hidden text-gray-500 hover:bg-gray-100 p-1 rounded-md"
-          onClick={() => setIsOpen(false)}
-        >
-          <X size={20} />
-        </button>
-      </div>
+
 
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         {menuItems.map((item) => (
@@ -63,8 +53,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               clsx(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
                 isActive 
-                  ? "bg-primary/10 text-primary font-medium" 
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-400 font-medium" 
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
               )
             }
           >
@@ -74,7 +64,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   size={20} 
                   className={clsx(
                     "transition-colors",
-                    isActive ? "text-primary" : "text-gray-400 group-hover:text-gray-600"
+                    isActive ? "text-primary dark:text-blue-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
                   )} 
                 />
                 {item.name}
@@ -82,6 +72,39 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             )}
           </NavLink>
         ))}
+      </div>
+
+      <div className="mt-auto border-t border-gray-100 dark:border-gray-800 p-4 shrink-0 flex flex-col gap-1 transition-colors">
+        <NavLink
+          to="/settings"
+          onClick={() => setIsOpen(false)}
+          className={({ isActive }) =>
+            clsx(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+              isActive 
+                ? "bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-400 font-medium" 
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <SettingsIcon 
+                size={20} 
+                className={clsx(
+                  "transition-colors",
+                  isActive ? "text-primary dark:text-blue-400" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                )} 
+              />
+              Settings
+            </>
+          )}
+        </NavLink>
+
+        <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100">
+          <HelpCircle size={20} className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+          <span className="font-medium">Help & Support</span>
+        </a>
       </div>
     </aside>
   );
