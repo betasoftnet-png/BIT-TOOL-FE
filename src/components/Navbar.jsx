@@ -190,7 +190,7 @@ export default function Navbar({ toggleMobileMenu }) {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-200 capitalize leading-tight">{activeUser.name}</p>
             </div>
             
-            <ChevronDown size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors hidden md:block" />
+            <ChevronDown size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 group-hover:rotate-180 transition-all duration-200 hidden md:block" />
             
             {/* Dropdown Menu */}
             <div className="absolute top-full right-0 mt-2 w-[360px] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[24px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col p-2">
