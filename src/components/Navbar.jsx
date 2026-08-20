@@ -80,7 +80,7 @@ export default function Navbar({ toggleMobileMenu }) {
               ...baseUser,
               ...data.data,
               name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
-              avatar: data.data.profilePicture || null,
+              avatar: data.data.profilePictureUrl || null,
               email: data.data.email,
             });
           } else {
