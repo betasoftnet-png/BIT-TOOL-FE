@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check } from 'lucide-react';
 
+const UserAvatar = ({ user, imgClass, fallbackClass }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (user.avatar && !hasError) {
+    return (
+      <img
+        src={user.avatar}
+        alt="Profile Avatar"
+        className={imgClass}
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className={fallbackClass}>
+      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+    </div>
+  );
+};
+
 export default function Navbar({ toggleMobileMenu }) {
   const [accounts, setAccounts] = useState([]);
   const [activeAccountIndex, setActiveAccountIndex] = useState(0);
@@ -163,34 +184,22 @@ export default function Navbar({ toggleMobileMenu }) {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight">{activeUser.name}</p>
             </div>
             
-            {activeUser.avatar ? (
-              <img 
-                src={activeUser.avatar} 
-                alt="Profile Avatar" 
-                className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border border-blue-700 shadow-sm shrink-0">
-                {activeUser.name ? activeUser.name.charAt(0).toUpperCase() : 'U'}
-              </div>
-            )}
+            <UserAvatar 
+              user={activeUser}
+              imgClass="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
+              fallbackClass="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border border-blue-700 shadow-sm shrink-0"
+            />
             
             {/* Dropdown Menu */}
             <div className="absolute top-full right-0 mt-2 w-[360px] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[24px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col p-2">
               
               {/* Active Account Header */}
               <div className="flex flex-col items-center p-6 text-center">
-                  {activeUser.avatar ? (
-                    <img 
-                      src={activeUser.avatar} 
-                      alt="Profile Avatar" 
-                      className="w-[72px] h-[72px] rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm mb-3"
-                    />
-                  ) : (
-                    <div className="w-[72px] h-[72px] rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-bold text-3xl shadow-sm mb-3">
-                      {activeUser.name ? activeUser.name.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                  )}
+                  <UserAvatar 
+                    user={activeUser}
+                    imgClass="w-[72px] h-[72px] rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm mb-3 shrink-0"
+                    fallbackClass="w-[72px] h-[72px] rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-bold text-3xl shadow-sm mb-3 shrink-0"
+                  />
                   <p className="text-lg font-bold text-gray-900 dark:text-white mb-0.5">{activeUser.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{activeUser.email}</p>
                   
@@ -214,17 +223,11 @@ export default function Navbar({ toggleMobileMenu }) {
                         onClick={() => handleSwitchAccount(idx)}
                         className="p-3 flex items-center gap-4 cursor-pointer transition-colors rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 mb-1"
                       >
-                        {acc.avatar ? (
-                          <img 
-                            src={acc.avatar} 
-                            alt="Profile Avatar" 
-                            className="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
-                            {acc.name ? acc.name.charAt(0).toLowerCase() : 'u'}
-                          </div>
-                        )}
+                        <UserAvatar 
+                          user={acc}
+                          imgClass="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm shrink-0"
+                          fallbackClass="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex items-center justify-center font-bold text-base shadow-sm shrink-0"
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{acc.name}</p>
                           <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate">{acc.email}</p>
