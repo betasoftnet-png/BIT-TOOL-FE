@@ -39,10 +39,11 @@ export default function Keyboard() {
   
   const textareaRef = useRef(null);
 
-  // Keep focus on the textarea naturally
+  // Keep focus on the textarea naturally and auto-focus on mount
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+      textareaRef.current.focus();
     }
   }, [text]);
 
@@ -179,6 +180,8 @@ export default function Keyboard() {
           e.preventDefault();
           handleKeyPress(key);
         }}
+        onMouseDown={(e) => e.preventDefault()}
+        onTouchStart={(e) => e.preventDefault()}
         onDoubleClick={key === 'shift' ? handleDoubleShift : undefined}
         className={`
           flex items-center justify-center rounded-[10px] sm:rounded-[12px] text-lg sm:text-2xl font-medium select-none
@@ -198,9 +201,9 @@ export default function Keyboard() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-gray-50 dark:bg-[#1C1C1E]">
-      <div className="flex-1 p-4 md:p-6 flex flex-col max-w-5xl mx-auto w-full">
+      <div className="flex-1 pt-1 md:pt-2 md:p-4 flex flex-col max-w-5xl mx-auto w-full">
         {/* Top Controls */}
-        <div className="flex justify-between items-center mb-4 px-2">
+        <div className="flex justify-between items-center mb-2 px-2">
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white tracking-tight">Keyboard</h1>
           <button 
             onClick={copyToClipboard}
@@ -216,7 +219,7 @@ export default function Keyboard() {
         </div>
 
         {/* Text Area */}
-        <div className="flex-1 bg-white dark:bg-[#2C2C2E] rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 sm:p-8 mb-6 flex flex-col relative overflow-hidden">
+        <div className="h-40 sm:h-56 bg-white dark:bg-[#2C2C2E] rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 p-2 sm:p-3 mb-2 flex flex-col relative overflow-hidden shrink-0">
           <textarea
             ref={textareaRef}
             value={text}

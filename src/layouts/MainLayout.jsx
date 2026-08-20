@@ -15,7 +15,7 @@ export default function MainLayout() {
         <Sidebar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-auto p-4 md:p-8 min-w-0 bg-gray-50/30 dark:bg-gray-900/50 transition-colors">
+        <main className="flex-1 overflow-auto p-3.5 md:p-8 min-w-0 bg-gray-50/30 dark:bg-gray-900/50 transition-colors">
           <div className="max-w-7xl mx-auto h-full">
             <Outlet />
           </div>
