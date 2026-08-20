@@ -80,7 +80,7 @@ export default function Navbar({ toggleMobileMenu }) {
               ...baseUser,
               ...data.data,
               name: data.data.firstName ? `${data.data.firstName} ${data.data.lastName || ''}`.trim() : (data.data.username || payload.sub),
-              avatar: data.data.profilePictureUrl || null,
+              avatar: data.data.profilePictureUrl ? (data.data.profilePictureUrl.startsWith('http') ? data.data.profilePictureUrl : `https://api.bnxmail.com/${data.data.profilePictureUrl.replace(/^\//, '')}`) : null,
               email: data.data.email,
             });
           } else {

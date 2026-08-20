@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
   const { theme, setLightMode, setDarkMode } = useTheme();
-  const [user, setUser] = useState({ name: 'User', email: 'Loading...' });
+  const [user, setUser] = useState({ name: 'User', email: 'Loading...', avatar: null });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -31,12 +31,13 @@ export default function Settings() {
           if (data.data.email) {
             email = data.data.email;
           }
+          let avatar = data.data.profilePictureUrl ? (data.data.profilePictureUrl.startsWith('http') ? data.data.profilePictureUrl : `https://api.bnxmail.com/${data.data.profilePictureUrl.replace(/^\//, '')}`) : null;
         }
         
-        setUser({ name, email });
+        setUser({ name, email, avatar });
       } catch (e) {
         console.error(e);
-        setUser({ name: 'User', email: 'Error loading profile' });
+        setUser({ name: 'User', email: 'Error loading profile', avatar: null });
       }
     };
     fetchUser();
@@ -57,9 +58,13 @@ export default function Settings() {
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft border border-gray-50 dark:border-gray-700 transition-colors"
         >
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
-              <User size={24} />
-            </div>
+            {user.avatar ? (
+              <img src={user.avatar} alt="Profile Avatar" className="w-12 h-12 rounded-xl object-cover shadow-sm border border-gray-100 dark:border-gray-700" />
+            ) : (
+              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center font-bold text-xl shadow-sm">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Profile</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">Your personal information</p>
