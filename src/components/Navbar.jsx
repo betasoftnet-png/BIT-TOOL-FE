@@ -126,7 +126,7 @@ export default function Navbar({ toggleMobileMenu }) {
   const activeUser = accounts.length > 0 ? accounts[activeAccountIndex] : null;
 
   return (
-    <header className="h-16 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-10 sticky top-0 shadow-sm transition-colors" style={{backgroundColor:"rgba(17, 87, 218, 0.66)"}}>
+    <header className="h-16 bg-white dark:bg-gray-900 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-10 sticky top-0 shadow-sm transition-colors">
       <div className="flex items-center gap-6 md:gap-20 lg:gap-25">
         <div className="flex items-center gap-2">
           <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-9 object-contain bg-white" style={{borderRadius:'5px'}} />
@@ -158,7 +158,7 @@ export default function Navbar({ toggleMobileMenu }) {
         </button>
         
         {activeUser ? (
-          <div className="flex items-center gap-3 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 py-1.5 pl-4 pr-1.5 rounded-full transition-colors border border-transparent dark:border-gray-700">
+          <div className="flex items-center gap-3 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors border border-transparent dark:border-gray-700">
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight">{activeUser.name}</p>
             </div>
