@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check, ChevronDown } from 'lucide-react';
 
 const UserAvatar = ({ user, imgClass, fallbackClass }) => {
   const [hasError, setHasError] = useState(false);
@@ -179,16 +179,18 @@ export default function Navbar({ toggleMobileMenu }) {
         </button>
         
         {activeUser ? (
-          <div className="flex items-center gap-3 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors border border-transparent dark:border-gray-700 p-1">
-            <div className="hidden md:block text-right">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200 uppercase leading-tight">{activeUser.name}</p>
-            </div>
-            
+          <div className="flex items-center gap-2 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors border border-transparent dark:border-gray-700 p-1 md:pr-3">
             <UserAvatar 
               user={activeUser}
               imgClass="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm shrink-0"
               fallbackClass="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm border border-blue-700 shadow-sm shrink-0"
             />
+            
+            <div className="hidden md:block text-left">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-200 capitalize leading-tight">{activeUser.name}</p>
+            </div>
+            
+            <ChevronDown size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors hidden md:block" />
             
             {/* Dropdown Menu */}
             <div className="absolute top-full right-0 mt-2 w-[360px] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[24px] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden flex flex-col p-2">
