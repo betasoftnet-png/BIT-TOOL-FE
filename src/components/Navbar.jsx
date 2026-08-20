@@ -181,7 +181,7 @@ export default function Navbar({ toggleMobileMenu }) {
         {activeUser ? (
           <div className="flex items-center gap-3 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors border border-transparent dark:border-gray-700 p-1">
             <div className="hidden md:block text-right">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight">{activeUser.name}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-200 uppercase leading-tight">{activeUser.name}</p>
             </div>
             
             <UserAvatar 
