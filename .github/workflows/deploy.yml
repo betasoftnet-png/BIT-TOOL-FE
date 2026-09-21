@@ -1,28 +1,51 @@
-name: Deploy to Server
+name: Deploy BIT Tool FE
 
 on:
   push:
     branches:
-      - main   # change to master if needed
+      - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: betasoftnet-png
+          password: ${{ secrets.GHCR_READ_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/betasoftnet-png/bit-tool-fe:latest
+          build-args: |
+            VITE_CALCULATOR_API_BASE_URL=${{ secrets.VITE_CALCULATOR_API_BASE_URL }}
+            VITE_AUTH_API_BASE_URL=${{ secrets.VITE_AUTH_API_BASE_URL }}
+            VITE_CONTACT_API_BASE_URL=${{ secrets.VITE_CONTACT_API_BASE_URL }}
+            VITE_NOTES_API_BASE_URL=${{ secrets.VITE_NOTES_API_BASE_URL }}
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: 204.168.244.118
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/BIT-TOOL-FE
-            git fetch origin
-            git reset --hard origin/main
-            npm install
-            npm run build
-            rm -rf /var/www/bit-tool-fe/*
-            cp -r dist/* /var/www/bit-tool-fe/
-            systemctl restart nginx
+
+            docker login ghcr.io \
+              -u betasoftnet-png \
+              -p '${{ secrets.GHCR_READ_TOKEN }}'
+
+            docker compose pull
+            docker compose up -d --force-recreate
+
+            docker image prune -f

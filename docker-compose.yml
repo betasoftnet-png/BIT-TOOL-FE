@@ -1,0 +1,7 @@
+services:
+  bit-tool-fe:
+    image: ghcr.io/betasoftnet-png/bit-tool-fe:latest
+    container_name: bit-tool-fe
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3105:80"
