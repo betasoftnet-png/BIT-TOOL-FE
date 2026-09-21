@@ -116,7 +116,7 @@ export default function Settings() {
                 className="overflow-hidden"
               >
                 <div className="mt-4 grid grid-cols-2 gap-3">
-            {user.role && (
+            {/* {user.role && (
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
                 <Shield size={16} className="text-gray-400 dark:text-gray-500" />
                 <div>
@@ -124,7 +124,7 @@ export default function Settings() {
                   <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.role}</p>
                 </div>
               </div>
-            )}
+            )} */}
             
             {user.accountType && (
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
