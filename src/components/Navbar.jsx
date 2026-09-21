@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { contactService } from '../services/contactService';
 import { noteService } from '../services/noteService';
 import { calendarService } from '../services/calendarService';
+import { notificationService } from '../services/notificationService';
 
 const SEARCH_ITEMS = [
   { name: 'Calculator', path: '/calculator', icon: Calculator, category: 'Tool' },
@@ -45,15 +46,25 @@ export default function Navbar({ toggleMobileMenu }) {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  // Search States
   const [globalData, setGlobalData] = useState({ contacts: [], notes: [], calendar: [] });
   const [isGlobalDataLoaded, setIsGlobalDataLoaded] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Notification States
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
+  const notificationsRef = useRef(null);
 
   // Handle clicking outside of search
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsSearchOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -87,6 +98,48 @@ export default function Navbar({ toggleMobileMenu }) {
       fetchData();
     }
   }, [isSearchOpen, isGlobalDataLoaded, isSearching]);
+
+  // Fetch notifications
+  useEffect(() => {
+    const activeToken = localStorage.getItem('bnx_auth_token');
+    if (activeToken) {
+      const fetchNotifications = async () => {
+        setIsNotificationsLoading(true);
+        try {
+          const res = await notificationService.getNotifications();
+          if (res.success && res.data) {
+            setNotifications(res.data);
+          }
+        } catch (e) {
+          console.error("Failed to load notifications", e);
+          setNotifications([]);
+        } finally {
+          setIsNotificationsLoading(false);
+        }
+      };
+      fetchNotifications();
+    }
+  }, []);
+
+  const handleMarkAsRead = async (id, e) => {
+    e.stopPropagation();
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    } catch (e) {
+      console.error("Failed to mark notification as read", e);
+    }
+  };
+
+  const handleMarkAllAsRead = async (e) => {
+    e.stopPropagation();
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (e) {
+      console.error("Failed to mark all notifications as read", e);
+    }
+  };
 
   const combinedSearchData = [
     ...SEARCH_ITEMS,
@@ -319,10 +372,92 @@ export default function Navbar({ toggleMobileMenu }) {
       </div>
 
       <div className="flex items-center gap-4 md:gap-6">
-        <button className="relative text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-        </button>
+        {/* Notifications */}
+        <div className="relative" ref={notificationsRef}>
+          <button 
+            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            className="relative text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <Bell size={20} />
+            {notifications.filter(n => !n.isRead).length > 0 && (
+              <span className="absolute top-1 right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 border-2 border-white dark:border-gray-900">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              </span>
+            )}
+          </button>
+
+          {/* Notifications Dropdown */}
+          <div className={`absolute top-full right-[-80px] md:right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden transition-all duration-200 origin-top-right ${isNotificationsOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+              <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
+              {notifications.filter(n => !n.isRead).length > 0 && (
+                <button 
+                  onClick={handleMarkAllAsRead}
+                  className="text-xs text-primary font-medium hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+                >
+                  Mark all as read
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+              {isNotificationsLoading ? (
+                <div className="flex flex-col items-center justify-center p-8 text-gray-500 dark:text-gray-400">
+                  <Loader2 className="animate-spin mb-2" size={24} />
+                  <p className="text-sm">Loading notifications...</p>
+                </div>
+              ) : notifications.length > 0 ? (
+                <div className="flex flex-col">
+                  {notifications.map((notif) => (
+                    <div 
+                      key={notif.id} 
+                      className={`flex gap-3 p-4 border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors cursor-default ${notif.isRead ? 'opacity-70' : 'bg-blue-50/30 dark:bg-blue-900/10'}`}
+                    >
+                      <div className="mt-1 shrink-0">
+                        <div className={`w-2 h-2 rounded-full ${notif.isRead ? 'bg-transparent' : 'bg-primary'}`}></div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className={`text-sm font-medium ${notif.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                            {notif.title}
+                          </p>
+                          <span className="text-[10px] text-gray-400 shrink-0 whitespace-nowrap">
+                            {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                          {notif.message}
+                        </p>
+                        {!notif.isRead && (
+                          <button 
+                            onClick={(e) => handleMarkAsRead(notif.id, e)}
+                            className="mt-2 text-[11px] font-medium text-primary hover:text-blue-700 transition-colors"
+                          >
+                            Mark as read
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-gray-500 dark:text-gray-400">
+                  <Bell className="mb-2 text-gray-300 dark:text-gray-600" size={32} />
+                  <p className="text-sm font-medium">All caught up!</p>
+                  <p className="text-xs mt-1">No new notifications</p>
+                </div>
+              )}
+            </div>
+            
+            {notifications.length > 0 && (
+              <div className="p-3 border-t border-gray-50 dark:border-gray-800 text-center bg-gray-50/50 dark:bg-gray-800/50">
+                <button className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                  View all notifications
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         
         {activeUser ? (
           <div className="flex items-center gap-2 cursor-pointer group relative bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors border border-transparent dark:border-gray-700 p-1 md:pr-3">
