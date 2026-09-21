@@ -307,7 +307,7 @@ export default function Navbar({ toggleMobileMenu }) {
   const activeUser = accounts.length > 0 ? accounts[activeAccountIndex] : null;
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-900 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-10 sticky top-0 shadow-sm transition-colors">
+    <header className="h-16 bg-white dark:bg-gray-900 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 z-50 sticky top-0 shadow-sm transition-colors">
       <div className="flex items-center gap-6 md:gap-20 lg:gap-25">
         <div className="flex items-center gap-2">
           <img src="/BIT-TOOL-2.png" alt="Bit Tool Logo" className="h-9 object-contain bg-white" style={{borderRadius:'5px'}} />
