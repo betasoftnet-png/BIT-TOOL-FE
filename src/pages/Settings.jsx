@@ -18,6 +18,7 @@ export default function Settings() {
         const payload = JSON.parse(atob(token.split('.')[1]));
         let name = payload.sub || 'User';
         let email = payload.email || payload.sub || '';
+        let avatar = null;
         
         const res = await fetch('https://api.bnxmail.com/api/users/me', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -31,7 +32,7 @@ export default function Settings() {
           if (data.data.email) {
             email = data.data.email;
           }
-          let avatar = data.data.profilePictureUrl ? (data.data.profilePictureUrl.startsWith('http') ? data.data.profilePictureUrl : `https://api.bnxmail.com/${data.data.profilePictureUrl.replace(/^\//, '')}`) : null;
+          avatar = data.data.profilePictureUrl ? (data.data.profilePictureUrl.startsWith('http') ? data.data.profilePictureUrl : `https://api.bnxmail.com/${data.data.profilePictureUrl.replace(/^\//, '')}`) : null;
         }
         
         setUser({ name, email, avatar });
