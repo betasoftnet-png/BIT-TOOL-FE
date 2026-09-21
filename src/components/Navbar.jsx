@@ -105,16 +105,21 @@ export default function Navbar({ toggleMobileMenu }) {
     // Only fetch if we have a token, and either it's the initial load OR the dropdown was just opened
     if (activeToken) {
       const fetchNotifications = async () => {
+        console.log("[Navbar] Fetching notifications...");
         if (notifications.length === 0) {
           setIsNotificationsLoading(true);
         }
         try {
           const res = await notificationService.getNotifications();
+          console.log("[Navbar] Notification API Response:", res);
           if (res.success && res.data) {
             setNotifications(res.data);
+            console.log(`[Navbar] Set ${res.data.length} notifications in state.`);
+          } else {
+            console.warn("[Navbar] API returned success=false or missing data.");
           }
         } catch (e) {
-          console.error("Failed to load notifications", e);
+          console.error("[Navbar] Failed to load notifications", e);
           // If we fail, don't wipe out existing notifications just in case it was a momentary blip
         } finally {
           setIsNotificationsLoading(false);

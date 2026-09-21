@@ -9,11 +9,15 @@ const getHeaders = () => {
 };
 
 const handleResponse = async (response) => {
+    console.log(`[NotificationService] Received response from ${response.url}:`, response.status);
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('[NotificationService] API Error:', errorData);
         throw new Error(errorData.message || 'API Request failed');
     }
-    return response.json();
+    const data = await response.json();
+    console.log('[NotificationService] API Success Data:', data);
+    return data;
 };
 
 export const notificationService = {
