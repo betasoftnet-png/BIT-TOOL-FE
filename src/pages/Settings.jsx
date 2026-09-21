@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { User, Palette, Info, ChevronRight, Moon, Sun, Briefcase, HardDrive, Shield, Calendar, CheckCircle2, Phone, Mail } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
   const { theme, setLightMode, setDarkMode } = useTheme();
   const [user, setUser] = useState({ name: 'User', email: 'Loading...', avatar: null, role: '', accountType: '', org: '', storageUsed: 0, storageLimit: 0, createdAt: null, isPrimary: false, phoneNumber: null, recoveryEmail: null, dob: null });
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -85,7 +86,10 @@ export default function Settings() {
               <p className="text-sm text-gray-500 dark:text-gray-400">Your personal information</p>
             </div>
           </div>
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <div 
+            onClick={() => setShowDetails(!showDetails)}
+            className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold text-lg">
                 {user.name.charAt(0).toUpperCase()}
@@ -100,10 +104,18 @@ export default function Settings() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
-            <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+            <ChevronRight size={20} className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 ${showDetails ? 'rotate-90' : ''}`} />
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <AnimatePresence>
+            {showDetails && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-4 grid grid-cols-2 gap-3">
             {user.role && (
               <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
                 <Shield size={16} className="text-gray-400 dark:text-gray-500" />
@@ -167,7 +179,10 @@ export default function Settings() {
                 </div>
               </div>
             )}
-          </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Theme Card */}
