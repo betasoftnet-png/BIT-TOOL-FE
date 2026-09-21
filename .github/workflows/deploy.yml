@@ -1,23 +1,32 @@
-name: Deploy BIT Tool FE
+name: Build and Deploy BIT Tool FE
 
 on:
   push:
     branches:
       - main
 
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ghcr.io/betasoftnet-png/bit-tool-fe
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login to GHCR
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: betasoftnet-png
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
@@ -25,7 +34,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/betasoftnet-png/bit-tool-fe:latest
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
             VITE_CALCULATOR_API_BASE_URL=${{ secrets.VITE_CALCULATOR_API_BASE_URL }}
             VITE_AUTH_API_BASE_URL=${{ secrets.VITE_AUTH_API_BASE_URL }}
@@ -33,19 +44,24 @@ jobs:
             VITE_NOTES_API_BASE_URL=${{ secrets.VITE_NOTES_API_BASE_URL }}
 
       - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: 204.168.244.118
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
             cd /var/www/BIT-TOOL-FE
 
-            docker login ghcr.io \
-              -u betasoftnet-png \
-              -p '${{ secrets.GHCR_READ_TOKEN }}'
+            echo "Logging in to GHCR..."
+            echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u betasoftnet-png --password-stdin
 
+            echo "Pulling latest Docker image..."
             docker compose pull
+
+            echo "Starting Docker container..."
             docker compose up -d --force-recreate
 
-            docker image prune -f
+            echo "Deployment completed."
+            docker ps --filter name=bit-tool-fe
