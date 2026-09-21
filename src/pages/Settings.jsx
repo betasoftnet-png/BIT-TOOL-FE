@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Palette, Info, ChevronRight, Moon, Sun } from 'lucide-react';
+import { User, Palette, Info, ChevronRight, Moon, Sun, Briefcase, HardDrive, Shield, Calendar, CheckCircle2, Phone, Mail } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
   const { theme, setLightMode, setDarkMode } = useTheme();
-  const [user, setUser] = useState({ name: 'User', email: 'Loading...', avatar: null });
+  const [user, setUser] = useState({ name: 'User', email: 'Loading...', avatar: null, role: '', accountType: '', org: '', storageUsed: 0, storageLimit: 0, createdAt: null, isPrimary: false, phoneNumber: null, recoveryEmail: null, dob: null });
 
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('bnx_auth_token');
       if (!token) {
-        setUser({ name: 'Guest', email: 'Not logged in' });
+        setUser({ name: 'Guest', email: 'Not logged in', avatar: null, role: '', accountType: '', org: '', storageUsed: 0, storageLimit: 0, createdAt: null, isPrimary: false, phoneNumber: null, recoveryEmail: null, dob: null });
         return;
       }
       try {
@@ -35,10 +35,24 @@ export default function Settings() {
           avatar = data.data.profilePictureUrl ? (data.data.profilePictureUrl.startsWith('http') ? data.data.profilePictureUrl : `https://api.bnxmail.com/${data.data.profilePictureUrl.replace(/^\//, '')}`) : null;
         }
         
-        setUser({ name, email, avatar });
+        setUser({ 
+          name, 
+          email, 
+          avatar,
+          accountType: data.data?.accountType || 'STANDARD',
+          role: data.data?.role || 'USER',
+          org: data.data?.organization?.name || null,
+          storageUsed: data.data?.storageUsed || 0,
+          storageLimit: data.data?.storageLimit || 0,
+          createdAt: data.data?.createdAt || null,
+          isPrimary: data.data?.isPrimary || false,
+          phoneNumber: data.data?.phoneNumber || null,
+          recoveryEmail: data.data?.recoveryEmail || null,
+          dob: data.data?.dob || null
+        });
       } catch (e) {
         console.error(e);
-        setUser({ name: 'User', email: 'Error loading profile', avatar: null });
+        setUser({ name: 'User', email: 'Error loading profile', avatar: null, role: '', accountType: '', org: '', storageUsed: 0, storageLimit: 0, createdAt: null, isPrimary: false, phoneNumber: null, recoveryEmail: null, dob: null });
       }
     };
     fetchUser();
@@ -77,11 +91,82 @@ export default function Settings() {
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="font-medium text-gray-800 dark:text-gray-200">{user.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="font-medium text-gray-800 dark:text-gray-200">{user.name}</p>
+                  {user.isPrimary && (
+                    <CheckCircle2 size={14} className="text-green-500" title="Primary Account" />
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
               </div>
             </div>
             <ChevronRight size={20} className="text-gray-400 dark:text-gray-500" />
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {user.role && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
+                <Shield size={16} className="text-gray-400 dark:text-gray-500" />
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Role</p>
+                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.role}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.accountType && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
+                <Briefcase size={16} className="text-gray-400 dark:text-gray-500" />
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Account Type</p>
+                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.accountType}</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
+              <Phone size={16} className="text-gray-400 dark:text-gray-500" />
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Phone Number</p>
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.phoneNumber || 'Not set'}</p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
+              <Mail size={16} className="text-gray-400 dark:text-gray-500" />
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Recovery Email</p>
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.recoveryEmail || 'Not set'}</p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex items-center gap-3">
+              <Calendar size={16} className="text-gray-400 dark:text-gray-500" />
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Date of Birth</p>
+                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{user.dob ? new Date(user.dob).toLocaleDateString() : 'Not set'}</p>
+              </div>
+            </div>
+
+            {user.storageLimit > 0 && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl flex flex-col justify-center col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <HardDrive size={14} className="text-gray-400 dark:text-gray-500" />
+                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">Storage</p>
+                  </div>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                    {(user.storageUsed / (1024*1024*1024)).toFixed(2)} GB / {(user.storageLimit / (1024*1024*1024)).toFixed(2)} GB
+                  </p>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 overflow-hidden">
+                  <div 
+                    className="bg-blue-500 h-1.5 rounded-full" 
+                    style={{ width: `${Math.min(100, (user.storageUsed / user.storageLimit) * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 
