@@ -112,7 +112,7 @@ export default function Navbar({ toggleMobileMenu }) {
         try {
           const res = await notificationService.getNotifications();
           console.log("[Navbar] Notification API Response:", res);
-          if (res.success && res.data) {
+          if ((res.success || res.status === 'success') && res.data) {
             setNotifications(res.data);
             console.log(`[Navbar] Set ${res.data.length} notifications in state.`);
           } else {
