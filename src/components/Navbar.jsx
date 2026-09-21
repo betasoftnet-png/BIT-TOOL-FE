@@ -99,12 +99,15 @@ export default function Navbar({ toggleMobileMenu }) {
     }
   }, [isSearchOpen, isGlobalDataLoaded, isSearching]);
 
-  // Fetch notifications
+  // Fetch notifications when the component mounts and whenever the dropdown is opened
   useEffect(() => {
     const activeToken = localStorage.getItem('bnx_auth_token');
+    // Only fetch if we have a token, and either it's the initial load OR the dropdown was just opened
     if (activeToken) {
       const fetchNotifications = async () => {
-        setIsNotificationsLoading(true);
+        if (notifications.length === 0) {
+          setIsNotificationsLoading(true);
+        }
         try {
           const res = await notificationService.getNotifications();
           if (res.success && res.data) {
@@ -112,14 +115,14 @@ export default function Navbar({ toggleMobileMenu }) {
           }
         } catch (e) {
           console.error("Failed to load notifications", e);
-          setNotifications([]);
+          // If we fail, don't wipe out existing notifications just in case it was a momentary blip
         } finally {
           setIsNotificationsLoading(false);
         }
       };
       fetchNotifications();
     }
-  }, []);
+  }, [isNotificationsOpen]);
 
   const handleMarkAsRead = async (id, e) => {
     e.stopPropagation();
