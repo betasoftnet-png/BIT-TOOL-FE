@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check, ChevronDown, Calculator, Calendar, Users, FileText, Cloud, Keyboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const SEARCH_ITEMS = [
+  { name: 'Calculator', path: '/calculator', icon: Calculator, category: 'Tool' },
+  { name: 'Calendar', path: '/calendar', icon: Calendar, category: 'Tool' },
+  { name: 'Contacts', path: '/contacts', icon: Users, category: 'App' },
+  { name: 'Notes', path: '/notes', icon: FileText, category: 'App' },
+  { name: 'Weather', path: '/weather', icon: Cloud, category: 'App' },
+  { name: 'Keyboard', path: '/keyboard', icon: Keyboard, category: 'Tool' },
+  { name: 'Settings', path: '/settings', icon: Settings, category: 'System' },
+];
 
 const UserAvatar = ({ user, imgClass, fallbackClass }) => {
   const [hasError, setHasError] = useState(false);
@@ -25,6 +36,33 @@ const UserAvatar = ({ user, imgClass, fallbackClass }) => {
 export default function Navbar({ toggleMobileMenu }) {
   const [accounts, setAccounts] = useState([]);
   const [activeAccountIndex, setActiveAccountIndex] = useState(0);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Handle clicking outside of search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredSearchData = SEARCH_ITEMS.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSearchSelect = (item) => {
+    navigate(item.path);
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     // 1. Process URL token
@@ -161,14 +199,49 @@ export default function Navbar({ toggleMobileMenu }) {
           <Menu size={20} />
         </button>
 
-        {/* Search Bar (UI Only) */}
-        <div className="hidden md:flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-4 py-2 w-64 lg:w-80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-inner ml-4 lg:ml-8">
-          <Search size={16} className="text-gray-400 dark:text-gray-500 mr-2" />
-          <input 
-            type="text" 
-            placeholder="Search tools, contacts..." 
-            className="bg-transparent border-none outline-none text-sm w-full text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-          />
+        {/* Search Bar */}
+        <div className="relative hidden md:block ml-4 lg:ml-8" ref={searchRef}>
+          <div className="flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-4 py-2 w-64 lg:w-80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-inner">
+            <Search size={16} className="text-gray-400 dark:text-gray-500 mr-2 shrink-0" />
+            <input 
+              type="text" 
+              placeholder="Search tools, contacts..." 
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchOpen(true);
+              }}
+              onFocus={() => setIsSearchOpen(true)}
+              className="bg-transparent border-none outline-none text-sm w-full text-gray-700 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            />
+          </div>
+          
+          {/* Dropdown Results */}
+          {isSearchOpen && searchQuery.trim() !== '' && (
+            <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl overflow-hidden z-50">
+              {filteredSearchData.length > 0 ? (
+                <div className="py-2 flex flex-col">
+                  {filteredSearchData.map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSearchSelect(item)}
+                      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left w-full"
+                    >
+                      <item.icon size={16} className="text-gray-500 dark:text-gray-400 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 leading-tight">{item.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 leading-tight mt-0.5">{item.category}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  No results found for "{searchQuery}"
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
