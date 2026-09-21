@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check, ChevronDown, Calculator, Calendar, Users, FileText, Cloud, Keyboard } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, LogIn, Settings, UserPlus, Check, ChevronDown, Calculator, Calendar, Users, FileText, Cloud, Keyboard, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { contactService } from '../services/contactService';
+import { noteService } from '../services/noteService';
+import { calendarService } from '../services/calendarService';
 
 const SEARCH_ITEMS = [
   { name: 'Calculator', path: '/calculator', icon: Calculator, category: 'Tool' },
@@ -42,6 +45,10 @@ export default function Navbar({ toggleMobileMenu }) {
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  const [globalData, setGlobalData] = useState({ contacts: [], notes: [], calendar: [] });
+  const [isGlobalDataLoaded, setIsGlobalDataLoaded] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
   // Handle clicking outside of search
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -53,9 +60,63 @@ export default function Navbar({ toggleMobileMenu }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredSearchData = SEARCH_ITEMS.filter(item => 
+  // Fetch global data on first search focus
+  useEffect(() => {
+    if (isSearchOpen && !isGlobalDataLoaded && !isSearching) {
+      const fetchData = async () => {
+        setIsSearching(true);
+        try {
+          const [contactsRes, notesRes, calendarRes] = await Promise.allSettled([
+            contactService.getAllContacts(),
+            noteService.getNotes(),
+            calendarService.search('')
+          ]);
+
+          const contacts = contactsRes.status === 'fulfilled' && contactsRes.value.data?.rows ? contactsRes.value.data.rows : [];
+          const notes = notesRes.status === 'fulfilled' && notesRes.value.data ? notesRes.value.data : [];
+          const calendar = calendarRes.status === 'fulfilled' && calendarRes.value.data ? calendarRes.value.data : [];
+
+          setGlobalData({ contacts, notes, calendar });
+          setIsGlobalDataLoaded(true);
+        } catch (e) {
+          console.error("Failed to load global search data", e);
+        } finally {
+          setIsSearching(false);
+        }
+      };
+      fetchData();
+    }
+  }, [isSearchOpen, isGlobalDataLoaded, isSearching]);
+
+  const combinedSearchData = [
+    ...SEARCH_ITEMS,
+    ...globalData.contacts.map(c => ({
+      name: c.name || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unnamed Contact',
+      category: 'Contact',
+      path: '/contacts',
+      icon: Users,
+      subtitle: c.email || c.phonenumber || ''
+    })),
+    ...globalData.notes.map(n => ({
+      name: n.title || 'Untitled Note',
+      category: 'Note',
+      path: '/notes',
+      icon: FileText,
+      subtitle: n.content ? n.content.replace(/<[^>]*>?/gm, '').substring(0, 40) + '...' : ''
+    })),
+    ...globalData.calendar.map(c => ({
+      name: c.title || 'Event',
+      category: 'Calendar',
+      path: '/calendar',
+      icon: Calendar,
+      subtitle: c.description || ''
+    }))
+  ];
+
+  const filteredSearchData = searchQuery.trim() === '' ? [] : combinedSearchData.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.subtitle && item.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleSearchSelect = (item) => {
@@ -217,21 +278,33 @@ export default function Navbar({ toggleMobileMenu }) {
           </div>
           
           {/* Dropdown Results */}
-          {isSearchOpen && searchQuery.trim() !== '' && (
-            <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl overflow-hidden z-50">
-              {filteredSearchData.length > 0 ? (
+          {(isSearchOpen && (searchQuery.trim() !== '' || isSearching)) && (
+            <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl overflow-hidden z-50 max-h-96 overflow-y-auto custom-scrollbar">
+              {isSearching ? (
+                <div className="flex flex-col items-center justify-center p-6 text-gray-500 dark:text-gray-400">
+                  <Loader2 className="animate-spin mb-2" size={24} />
+                  <p className="text-sm">Loading data...</p>
+                </div>
+              ) : filteredSearchData.length > 0 ? (
                 <div className="py-2 flex flex-col">
                   {filteredSearchData.map((item, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSearchSelect(item)}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left w-full"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left w-full border-b border-gray-50 dark:border-gray-800 last:border-0"
                     >
-                      <item.icon size={16} className="text-gray-500 dark:text-gray-400 shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 leading-tight">{item.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 leading-tight mt-0.5">{item.category}</p>
+                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                        <item.icon size={16} className="text-gray-500 dark:text-gray-400" />
                       </div>
+                      <div className="flex-1 overflow-hidden">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 leading-tight truncate">{item.name}</p>
+                        {item.subtitle && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{item.subtitle}</p>
+                        )}
+                      </div>
+                      <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full shrink-0">
+                        {item.category}
+                      </span>
                     </button>
                   ))}
                 </div>
