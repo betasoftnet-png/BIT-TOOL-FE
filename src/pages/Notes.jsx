@@ -19,7 +19,7 @@ const COLORS = [
   'rgba(149, 165, 166, 0.4)', // Gray
 ];
 
-const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onClick }) => {
+const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, handleToggleArchive, onClick }) => {
   const [showPalette, setShowPalette] = useState(false);
 
   return (
@@ -92,7 +92,10 @@ const NoteCard = ({ note, handleTogglePin, handleColorChange, handleDelete, onCl
               )}
             </AnimatePresence>
           </button>
-          <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors" title="Archive">
+          <button 
+            onClick={(e) => handleToggleArchive(e, note)}
+            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-900/10 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors" title={note.isArchived ? "Unarchive" : "Archive"}
+          >
             <Archive size={16} />
           </button>
         </div>
@@ -126,15 +129,17 @@ export default function Notes() {
   const notes = notesObj?.data || [];
   
   // Extract unique app names for the filter
-  const availableApps = ['All', ...new Set(notes.map(n => n.applicationName).filter(Boolean))];
+  const availableApps = ['All', 'Archived', ...new Set(notes.map(n => n.applicationName).filter(Boolean))];
 
   // Filter notes by selected app
   const filteredNotes = selectedApp === 'All' 
-    ? notes 
-    : notes.filter(n => n.applicationName === selectedApp);
+    ? notes.filter(n => !n.isArchived)
+    : selectedApp === 'Archived'
+    ? notes.filter(n => n.isArchived)
+    : notes.filter(n => n.applicationName === selectedApp && !n.isArchived);
 
-  const pinnedNotes = filteredNotes.filter(n => n.isPinned && !n.isArchived);
-  const otherNotes = filteredNotes.filter(n => !n.isPinned && !n.isArchived);
+  const pinnedNotes = filteredNotes.filter(n => n.isPinned);
+  const otherNotes = filteredNotes.filter(n => !n.isPinned);
 
   const createMutation = useMutation({
     mutationFn: (data) => noteService.createNote(data),
@@ -217,6 +222,11 @@ export default function Notes() {
     deleteMutation.mutate(id);
   };
 
+  const handleToggleArchive = (e, note) => {
+    e.stopPropagation();
+    updateMutation.mutate({ id: note.id, data: { isArchived: !note.isArchived } });
+  };
+
   return (
     <div className="relative min-h-screen p-4 md:p-8 overflow-hidden z-0">
       <div className="max-w-7xl mx-auto">
@@ -269,6 +279,12 @@ export default function Notes() {
                           />
                         ))}
                       </div>
+                    </button>
+                    <button className="p-2.5 rounded-full text-gray-400 hover:bg-gray-900/5 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Add checklist" onClick={() => alert("Checklists coming soon!")}>
+                      <CheckSquare size={20} />
+                    </button>
+                    <button className="p-2.5 rounded-full text-gray-400 hover:bg-gray-900/5 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Add image" onClick={() => alert("Image upload coming soon!")}>
+                      <ImageIcon size={20} />
                     </button>
                   </div>
                   
@@ -340,7 +356,7 @@ export default function Notes() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
                   <AnimatePresence>
                     {pinnedNotes.map(note => (
-                      <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} onClick={setEditingNote} />
+                      <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} handleToggleArchive={handleToggleArchive} onClick={setEditingNote} />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -357,7 +373,7 @@ export default function Notes() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
                   <AnimatePresence>
                     {otherNotes.map(note => (
-                      <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} onClick={setEditingNote} />
+                      <NoteCard key={note.id} note={note} handleTogglePin={handleTogglePin} handleColorChange={handleColorChange} handleDelete={handleDelete} handleToggleArchive={handleToggleArchive} onClick={setEditingNote} />
                     ))}
                   </AnimatePresence>
                 </div>
