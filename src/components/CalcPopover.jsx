@@ -513,7 +513,8 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
             width: '100%',
             flex: 1,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            minHeight: 0
         } : {
             position: 'relative',
             display: 'inline-block',
@@ -542,7 +543,8 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            fontFamily: "'Inter', sans-serif"
+            fontFamily: "'Inter', sans-serif",
+            minHeight: 0
         } : {
             position: 'absolute',
             right: 0,
@@ -701,7 +703,7 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                     <div className="flex flex-col lg:flex-row flex-1 min-h-0">
                         
                         {/* LEFT COLUMN: Middle Scrollable Section (Tape Area & History) */}
-                        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRight: '1px solid #E2E8F0', background: '#FAFAFB' }} className="custom-scrollbar">
+                        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRight: '1px solid #E2E8F0', background: '#FAFAFB', minHeight: 0 }} className="custom-scrollbar">
 
                     {showHistory ? (
                         <div style={{
@@ -931,7 +933,7 @@ export function CalcPopover({ isInline = false, onCloseInline } = {}) {
                         </div>
                         
                         {/* RIGHT COLUMN: Controls (SmartBar, Keypad, Total) */}
-                        <div className="w-full lg:w-[380px] flex flex-col bg-white shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200">
+                        <div className="w-full lg:w-[380px] flex flex-col bg-white shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200" style={{ overflowY: 'auto', minHeight: 0 }}>
                             <div style={styles.smartBar}>
                             <button 
                                 onClick={() => setShowSmartOptions(showSmartOptions === 'gst' ? null : 'gst')}
