@@ -276,7 +276,7 @@ export default function Navbar({ toggleMobileMenu }) {
   const handleSignIn = () => {
     const clientId = 'bit-tool';
     const redirectUri = encodeURIComponent(window.location.origin + '/auth');
-    const authUrl = `https://www.b2auth.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+    const authUrl = `https://www.b2auth.com/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
     window.location.href = authUrl;
   };
 
